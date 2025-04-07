@@ -4,22 +4,20 @@ import asyncio
 import argparse
 import math
 import time
-import json # Pour parser les données ZMQ
-import zmq # Import ZMQ
-import zmq.asyncio # Import le support asyncio pour ZMQ
+import json
+import zmq
+import zmq.asyncio
 from mavsdk import System
 from mavsdk.action import ActionError
 from mavsdk.telemetry import PositionVelocityNed, PositionInfo, PositionBody, PositionNed
 from mavsdk.offboard import OffboardError, PositionNedYaw
 
-# region --- Helper Functions for Geo Calculations ---
-# ... (les fonctions get_distance_metres, get_bearing_degrees, get_location_metres restent inchangées) ...
-def get_distance_metres(lat1, lon1, lat2, lon2):
+def get_distance_meters(lat1, lon1, lat2, lon2):
     """
     Calculate distance between two GPS coordinates in meters using Haversine formula.
     Approximation, good for short distances.
     """
-    R = 6371e3  # Earth radius in meters
+    R = 6371e3
     phi1 = math.radians(lat1)
     phi2 = math.radians(lat2)
     delta_phi = math.radians(lat2 - lat1)
@@ -60,18 +58,16 @@ def get_location_metres(lat, lon, bearing_deg, distance_m):
                                math.cos(angular_distance) - math.sin(lat_rad) * math.sin(lat2))
 
     return math.degrees(lat2), math.degrees(lon2)
-# endregion
 
 class DroneCoordinator:
-    # Ajout de zmq_bind_addr et zmq_timeout
     def __init__(self, vtol_address, fpv_address, follow_alt_offset, follow_dist, safety_dist, zmq_bind_addr, zmq_timeout):
         self.vtol_address = vtol_address
         self.fpv_address = fpv_address
         self.follow_alt_offset = follow_alt_offset
         self.follow_dist = follow_dist
         self.safety_dist = safety_dist
-        self.zmq_bind_addr = zmq_bind_addr # Adresse sur laquelle le script écoute
-        self.zmq_timeout = zmq_timeout # Timeout pour la réception ZMQ
+        self.zmq_bind_addr = zmq_bind_addr
+        self.zmq_timeout = zmq_timeout
 
         self.vtol_drone = System(mavsdk_server_address='localhost', port=50050)
         self.fpv_drone = System(mavsdk_server_address='localhost', port=50051)
@@ -79,19 +75,16 @@ class DroneCoordinator:
         self.target_coords = None
         self.fpv_manual_takeover_requested = False
 
-        # Initialiser le contexte ZMQ pour asyncio
         self.zmq_context = zmq.asyncio.Context()
 
 
     async def connect_drones(self):
-        # ... (inchangé) ...
         """ Connects to both drones concurrently. """
         print("--- Connecting to Drones ---")
         connect_vtol = self.vtol_drone.connect(system_address=self.vtol_address)
         connect_fpv = self.fpv_drone.connect(system_address=self.fpv_address)
 
         try:
-            # Wait for VTOL connection first - it's the primary system
             print(f"Connecting to VTOL drone at {self.vtol_address}...")
             await asyncio.wait_for(connect_vtol, timeout=15)
             print("VTOL Drone Connected!")
@@ -102,21 +95,20 @@ class DroneCoordinator:
         print("Waiting for FPV drone release and connection...")
         # The FPV drone might only become available after physical release
         # Retry connecting for a while
-        for attempt in range(10): # Try for ~50 seconds
+        for attempt in range(10):
              try:
                  print(f"Connecting to FPV drone at {self.fpv_address} (attempt {attempt+1})...")
                  # We don't use wait_for here, connect() itself might handle some internal timeout/retries
                  # If it fails quickly, we retry. If it hangs, the outer logic might need adjustment.
-                 await self.fpv_drone.connect(system_address=self.fpv_address) # Re-call connect inside loop
-                 # Check health after potential connection
+                 await self.fpv_drone.connect(system_address=self.fpv_address)
                  async for state in self.fpv_drone.core.connection_state():
                       if state.is_connected:
                            print("FPV Drone Connected!")
-                           return True # Both connected
+                           return True
                       else:
                            print("FPV not connected yet...")
-                           await asyncio.sleep(2) # Wait before next check/attempt
-             except Exception as e: # Catch potential exceptions during connect call
+                           await asyncio.sleep(2)
+             except Exception as e:
                  print(f"Error connecting to FPV on attempt {attempt+1}: {e}")
 
              print("Waiting 5 seconds before next FPV connection attempt...")
@@ -127,20 +119,16 @@ class DroneCoordinator:
         return False
 
     async def wait_for_fpv_stabilization(self):
-        # ... (inchangé) ...
         """ Waits until the FPV drone reports being stable (e.g., in Hold mode). """
         print("--- Waiting for FPV Drone to Stabilize After Release ---")
-        required_mode = "HOLD" # Or LOITER, POSITION, etc. depending on FPV drone's autopilot config
+        required_mode = "HOLD"
         stabilized = False
         async for flight_mode in self.fpv_drone.telemetry.flight_mode():
              print(f"FPV Drone current mode: {flight_mode}")
-             # Also check if it has a valid position lock and some altitude
              try:
                 pos = await asyncio.wait_for(asyncio.ensure_future(self.get_position(self.fpv_drone)), timeout=1.0)
                 if pos and pos.relative_altitude_m > 1.0: # Check if above 1m
-                    # Convert enum to string for comparison
                     mode_str = str(flight_mode)
-                    # Handle potential variations like "POSITION_CONTROL" vs "POSITION"
                     if required_mode in mode_str.upper():
                         print(f"FPV Drone stabilized in {flight_mode} mode at {pos.relative_altitude_m:.1f}m altitude.")
                         stabilized = True
@@ -162,13 +150,12 @@ class DroneCoordinator:
         return True
 
     async def get_position(self, drone):
-        # ... (inchangé) ...
         """ Safely fetches the current position (lat, lon, relative_alt). """
         try:
             # Get position once, requires drone to be actively streaming telemetry
             position = await asyncio.wait_for(
                 asyncio.ensure_future(self._get_latest_position(drone)),
-                timeout=2.0 # Timeout if no position received quickly
+                timeout=2.0
             )
             return position
         except asyncio.TimeoutError:
@@ -185,7 +172,6 @@ class DroneCoordinator:
 
 
     async def run_follow_mode(self):
-        # ... (inchangé - la logique de suivi reste la même) ...
         """ Manages the FPV drone following the VTOL drone. """
         print("--- Starting Follow Mode ---")
         in_safety_hold = False
@@ -208,8 +194,7 @@ class DroneCoordinator:
                     await asyncio.sleep(1)
                     continue
 
-                # Calculate distance
-                current_distance = get_distance_metres(vtol_pos.latitude_deg, vtol_pos.longitude_deg,
+                current_distance = get_distance_meters(vtol_pos.latitude_deg, vtol_pos.longitude_deg,
                                                        fpv_pos.latitude_deg, fpv_pos.longitude_deg)
                 print(f"Distance between drones: {current_distance:.1f} m")
 
@@ -217,7 +202,6 @@ class DroneCoordinator:
                 if current_distance < self.safety_dist:
                     if not in_safety_hold:
                         print(f"WARNING: Drones too close ({current_distance:.1f}m < {self.safety_dist}m)! FPV drone entering safety hold.")
-                        # Command FPV drone to hold position
                         try:
                             await self.fpv_drone.action.hold()
                             in_safety_hold = True
@@ -321,7 +305,6 @@ class DroneCoordinator:
             print("--- Failed to receive target coordinates via ZMQ (Timeout or Error) ---")
             return False
 
-    # Nouvelle fonction pour écouter ZMQ
     async def listen_for_apriltag_coords_zmq(self):
         """
         Listens for AprilTag coordinates (lat, lon) sent via ZeroMQ PUSH/PULL.
@@ -436,7 +419,7 @@ class DroneCoordinator:
                        await asyncio.sleep(1)
                        continue
 
-                  dist_to_target = get_distance_metres(vtol_pos.latitude_deg, vtol_pos.longitude_deg,
+                  dist_to_target = get_distance_meters(vtol_pos.latitude_deg, vtol_pos.longitude_deg,
                                                       target_lat, target_lon)
                   print(f"VTOL distance to target: {dist_to_target:.1f}m")
                   if dist_to_target < 2.0: # Consider arrived if within 2 meters
@@ -490,10 +473,8 @@ if __name__ == "__main__":
                         help="Target follow distance (meters) between drones.")
     parser.add_argument('--safety-dist', type=float, default=10.0,
                         help="Minimum safety distance (meters). FPV stops if closer.")
-    # Nouvel argument pour l'adresse ZMQ
     parser.add_argument('--zmq-bind-addr', type=str, default="tcp://*:5556",
                         help="ZeroMQ address for this script to BIND to (PULL socket). FPV drone should connect to this.")
-    # Nouvel argument pour le timeout ZMQ
     parser.add_argument('--zmq-timeout', type=float, default=300.0,
                         help="Timeout in seconds to wait for the ZMQ message with coordinates.")
 
@@ -513,9 +494,8 @@ if __name__ == "__main__":
         follow_alt_offset=args.follow_alt_offset,
         follow_dist=args.follow_dist,
         safety_dist=args.safety_dist,
-        zmq_bind_addr=args.zmq_bind_addr, # Passer l'adresse ZMQ
-        zmq_timeout=args.zmq_timeout   # Passer le timeout ZMQ
+        zmq_bind_addr=args.zmq_bind_addr,
+        zmq_timeout=args.zmq_timeout
     )
 
-    # Run the asyncio event loop
     asyncio.run(coordinator.run())
