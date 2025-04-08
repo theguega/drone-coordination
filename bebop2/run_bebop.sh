@@ -13,7 +13,7 @@ else
 fi
 
 # Run the container
-docker run --rm -it \
+docker run -it \
   --net=host \
   --env="DISPLAY" \
   $IMAGE_NAME \
