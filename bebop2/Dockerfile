@@ -1,52 +1,39 @@
-# Use the official ROS Noetic image as the base
-FROM ros:noetic-ros-core
+FROM ros:kinetic-ros-core
 
-# Set the working directory for the project
-WORKDIR /workspace
+WORKDIR /root
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y
+
+RUN apt-get install -y \
     build-essential \
-    python3-rosdep \
-    python3-catkin-tools \
+    python-rosdep \
+    python-catkin-tools \
     git \
-    ffmpeg \
-    libavcodec-dev \
-    libavformat-dev \
-    libavutil-dev \
-    libswscale-dev \
-    ros-noetic-image-transport \
-    ros-noetic-tf2 \
-    ros-noetic-tf2-ros \
-    ros-noetic-tf2-geometry-msgs \
-    ros-noetic-roslint \
-    ros-noetic-angles \
-    ros-noetic-joy \
-    ros-noetic-joy-teleop \
-    ros-noetic-image-view \
+    ros-kinetic-catkin \
+    ros-kinetic-angles \
+    ros-kinetic-image-view \
+    ros-kinetic-dynamic-reconfigure \
+    ros-kinetic-urdf \
+    ros-kinetic-roslint \
+    ros-kinetic-joy-teleop \
+    ros-kinetic-tf2-geometry-msgs \
+    ros-kinetic-joy \
+    ros-kinetic-camera-info-manager \
     && rm -rf /var/lib/apt/lists/*
 
-# Initialize rosdep and update the database
-RUN rosdep init && rosdep update
+RUN rosdep init || true
+RUN rosdep update
 
-# Create and initialize the catkin workspace
-RUN mkdir -p /workspace/bebop_ws/src && cd /workspace/bebop_ws && catkin init
+RUN mkdir -p /root/bebop_ws/src
 
-# Clone bebop_autonomy into the workspace
-RUN git clone https://github.com/AutonomyLab/bebop_autonomy.git /workspace/bebop_ws/src/bebop_autonomy
+RUN git clone https://github.com/AutonomyLab/bebop_autonomy.git /root/bebop_ws/src/bebop_autonomy
 
-# Skip the rosdep install step for now (it can fail due to parrot_arsdk)
-# RUN rosdep install --from-paths /workspace/bebop_ws/src -i --rosdistro=noetic -y
+RUN git clone https://github.com/AutonomyLab/parrot_arsdk.git /root/bebop_ws/src/parrot_arsdk
 
-# Switch to bash and build the workspace using catkin build
-RUN /bin/bash -c "source /opt/ros/noetic/setup.bash && cd /workspace/bebop_ws && catkin build"
+RUN rosdep install --from-paths /root/bebop_ws/src -i -i --rosdistro kinetic -y
 
-# Set the default shell to bash
-SHELL ["/bin/bash", "-c"]
+RUN source /opt/ros/kinetic/setup.bash && \
+    cd /root/bebop_ws && \
+    catkin build
 
-# Source ROS and catkin environment variables for any new shell
-RUN echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc && \
-    echo "source /workspace/bebop_ws/devel/setup.bash" >> ~/.bashrc
-
-# Set the default command to run when the container starts
-CMD ["/bin/bash"]
+CMD ["bash", "-c", "source /opt/ros/kinetic/setup.bash && source /root/bebop_ws/devel/setup.bash && bash"]

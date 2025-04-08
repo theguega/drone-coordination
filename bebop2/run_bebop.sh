@@ -16,8 +16,5 @@ fi
 docker run --rm -it \
   --net=host \
   --env="DISPLAY" \
-  -v "$PROJECT_DIR":/catkin_ws/src \
-  -w /catkin_ws \
   $IMAGE_NAME \
   bash
-
