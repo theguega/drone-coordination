@@ -1,5 +1,5 @@
 [project]
-name = "drone-following"
+name = "drone-coordination"
 version = "0.1.0"
 description = "A simple follow-me application to coordinate two drones."
 authors = [{ name = "Theo Guegan", email = "theo.guegan@etu.utc.fr" }]
@@ -7,15 +7,9 @@ readme = "README.md"
 requires-python = ">=3.10"
 
 dependencies = [
-    "geographiclib>=2.0",
-    "mavsdk>=3.0.1",
-    "parrot-olympe>=7.7.5",
-    "rospy",
-    "std_msgs",
-    "sensor_msgs",
-    "tf-transformations",
+    "parrot-olympe",
+    "geographiclib",
+    "mavsdk",
     "customtkinter",
+    "pillow",
 ]
-
-[tool.setuptools]
-packages = ["drone_coordination"]

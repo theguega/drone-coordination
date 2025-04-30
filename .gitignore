@@ -4,3 +4,5 @@
 **/.venv
 **/.vscode
 **/build
+**/*.egg-info
+uv.lock

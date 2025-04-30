@@ -1,76 +1,40 @@
-# Use official Ubuntu image
-FROM ubuntu:20.04
+FROM ros:kinetic-ros-core
 
-# Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive
-ENV ROS_DISTRO=noetic
+WORKDIR /root
 
-# Install base system dependencies
-RUN apt-get update && apt-get install -y \
-    python3-pip \
-    python3-venv \
-    python3-dev \
+# Install necessary dependencies
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y \
     build-essential \
-    curl \
-    wget \
-    lsb-release \
-    gnupg2 \
+    python-rosdep \
+    python-catkin-tools \
     git \
-    sudo \
-    locales \
+    net-tools \
+    ros-kinetic-catkin \
+    ros-kinetic-angles \
+    ros-kinetic-image-view \
+    ros-kinetic-dynamic-reconfigure \
+    ros-kinetic-urdf \
+    ros-kinetic-xacro \
+    ros-kinetic-roslint \
+    ros-kinetic-joy-teleop \
+    ros-kinetic-tf2-geometry-msgs \
+    ros-kinetic-joy \
+    ros-kinetic-camera-info-manager \
     && rm -rf /var/lib/apt/lists/*
 
-# Set locale
-RUN locale-gen en_US en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
-# Install ROS Noetic
-RUN apt-get update && apt-get install -y \
-    ros-noetic-desktop-full \
-    python3-rosdep \
-    python3-catkin-tools \
-    ros-noetic-rospy \
-    ros-noetic-std-msgs \
-    ros-noetic-sensor-msgs
-
-# Initialize rosdep
+# Install ros packages
+RUN apt-get update
 RUN rosdep init || true
 RUN rosdep update
 
-# Create a workspace for catkin
-RUN mkdir -p /root/catkin_ws/src
+# Clone bebop_autonomy and parrot_arsdk
+RUN mkdir -p /root/bebop_ws/src
+RUN git clone https://github.com/AutonomyLab/bebop_autonomy.git /root/bebop_ws/src/bebop_autonomy
+RUN git clone https://github.com/AutonomyLab/parrot_arsdk.git /root/bebop_ws/src/parrot_arsdk
 
-# Clone bebop_autonomy
-WORKDIR /root/catkin_ws/src
-RUN git clone https://github.com/AutonomyLab/bebop_autonomy.git
+# Build bebop_autonomy
+RUN /bin/bash -c "source /opt/ros/kinetic/setup.bash && rosdep install --from-paths /root/bebop_ws/src -i --rosdistro kinetic -y"
+RUN /bin/bash -c "source /opt/ros/kinetic/setup.bash && cd /root/bebop_ws && catkin build"
 
-# Install dependencies and build
-WORKDIR /root/catkin_ws
-RUN rosdep install --from-paths src -i -y
-RUN /bin/bash -c "source /opt/ros/noetic/setup.bash && catkin build"
-
-# Copy your project inside the container
-WORKDIR /root
-COPY . drone-following/
-
-# Set working dir to your project
-WORKDIR /root/drone-following
-
-# Install uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Setup Python environment
-RUN /root/.cargo/bin/uv venv
-RUN /root/.cargo/bin/uv pip install -e .
-
-# Source ROS when container starts
-RUN echo "source /opt/ros/noetic/setup.bash" >> /root/.bashrc
-RUN echo "source /root/catkin_ws/devel/setup.bash" >> /root/.bashrc
-
-# Expose relevant ports if needed (for bebop control etc)
-EXPOSE 14550
-
-# Default command (start a bash with ROS + catkin + your venv ready)
-CMD ["/bin/bash", "-c", "source /root/.bashrc && bash"]
+CMD ["bash", "-c", "source /opt/ros/kinetic/setup.bash && source /root/bebop_ws/devel/setup.bash && bash"]

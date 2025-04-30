@@ -1,126 +1,121 @@
-import tkinter
+from typing import Callable, Dict
 
 import customtkinter
 from customtkinter import CTkImage
+from PIL import Image
 
-customtkinter.set_appearance_mode("dark")
+customtkinter.set_appearance_mode("system")
+customtkinter.set_default_color_theme("dark-blue")
 
 
 class UI(customtkinter.CTk):
-    def __init__(
-        self,
-        drone_type_options,
-        takeoff_callback=None,
-        land_callback=None,
-        follow_me_callback=None,
-    ):
+    def __init__(self, callbacks_commands: Dict[str, Callable]):
         super().__init__()
 
         self.title("Drone Controller")
         self.geometry("600x400")
 
-        self.takeoff_callback = takeoff_callback
-        self.land_callback = land_callback
-        self.follow_me_callback = follow_me_callback
+        # Set grid weights for responsiveness
+        self.grid_rowconfigure(0, weight=0)  # Header
+        self.grid_rowconfigure(1, weight=1)  # Body
+        self.grid_rowconfigure(2, weight=0)  # Footer
+        self.grid_columnconfigure(0, weight=1)
 
-        self.drone_image = CTkImage(file="doc/drone-svgrepo-com.svg", size=(100, 100))
-        self.image_label = customtkinter.CTkLabel(self, image=self.drone_image, text="")
-        self.image_label.pack(pady=10)
+        # Store callbacks
+        self.takeoff_callback_leader = callbacks_commands["takeoff_leader"]
+        self.land_callback_leader = callbacks_commands["land_leader"]
+        self.follow_me_callback = callbacks_commands["follow_me"]
+        self.takeoff_callback_follower = callbacks_commands["takeoff_follower"]
+        self.land_callback_follower = callbacks_commands["land_follower"]
 
-        self.leader_frame = customtkinter.CTkFrame(self, fg_color="#333333")
-        self.leader_frame.pack(side="left", padx=10, pady=10)
+        # --- Header ---
+        self.header = customtkinter.CTkFrame(master=self)
+        self.header.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        self.header.grid_columnconfigure(1, weight=1)
 
-        self.shared_frame = customtkinter.CTkFrame(self, fg_color="#333333")
-        self.shared_frame.pack(side="left", padx=10, pady=10)
+        # App Icon Switch
+        self.black_logo = Image.open("doc/drone.png").resize((50, 50))
+        self.white_logo = Image.open("doc/drone_2.png").resize((50, 50))
+        self.drone_image = CTkImage(light_image=self.white_logo, dark_image=self.black_logo)
+        self.switch_button = customtkinter.CTkButton(
+            master=self.header,
+            image=self.drone_image,
+            command=self.switch_appearance,
+            width=50,
+            height=50,
+            text="",
+        )
+        self.switch_button.grid(row=0, column=0, padx=10)
 
-        self.follower_frame = customtkinter.CTkFrame(self, fg_color="#333333")
-        self.follower_frame.pack(side="left", padx=10, pady=10)
+        self.header_title = customtkinter.CTkLabel(
+            master=self.header,
+            text="Drone Controller",
+            font=("Roboto Medium", 20),
+            anchor="center",
+        )
+        self.header_title.grid(row=0, column=1, padx=10)
 
-        # Shared Frame
-        self.follow_me_var = tkinter.BooleanVar(value=False)
-        self.follow_me_checkbox = customtkinter.CTkCheckBox(
-            self.shared_frame,
+        # --- Body ---
+        self.body = customtkinter.CTkFrame(master=self)
+        self.body.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        self.body.grid_columnconfigure(0, weight=1)
+        self.body.grid_rowconfigure(0, weight=1)
+
+        self.follow_button = customtkinter.CTkButton(
+            master=self.body,
             text="Follow Me",
-            variable=self.follow_me_var,
-            fg_color="#333333",
+            command=self.follow_me_callback,
+            height=50,
         )
-        self.follow_me_checkbox = customtkinter.CTkCheckBox(
-            self.shared_frame,
-            text="Follow Me",
-            variable=self.follow_me_var,
-            fg_color="#333333",
-            command=self.toggle_follow_me,
+        self.follow_button.grid(row=0, column=0, padx=10, pady=10, sticky="n")
+
+        # --- Footer ---
+        self.footer = customtkinter.CTkFrame(master=self)
+        self.footer.grid(row=2, column=0, sticky="ew", padx=10, pady=10)
+        self.footer.grid_columnconfigure((0, 1), weight=1)
+
+        self.takeoff_leader_button = customtkinter.CTkButton(
+            master=self.footer,
+            text="Takeoff Leader",
+            command=self.takeoff_callback_leader,
         )
-        self.follow_me_checkbox.pack(pady=10)
+        self.takeoff_leader_button.grid(row=0, column=0, padx=10, pady=5)
 
-        self.button1 = customtkinter.CTkButton(
-            self.shared_frame, text="Button 1", fg_color="#333333"
+        self.land_leader_button = customtkinter.CTkButton(
+            master=self.footer,
+            text="Land Leader",
+            command=self.land_callback_leader,
         )
-        self.button1.pack(pady=5)
+        self.land_leader_button.grid(row=1, column=0, padx=10, pady=5)
 
-    def toggle_follow_me(self):
-        if self.follow_me_callback:
-            self.follow_me_callback(self.follow_me_var.get())
-
-        self.button2 = customtkinter.CTkButton(
-            self.shared_frame, text="Button 2", fg_color="#333333"
+        self.takeoff_follower_button = customtkinter.CTkButton(
+            master=self.footer,
+            text="Takeoff Follower",
+            command=self.takeoff_callback_follower,
         )
-        self.button2.pack(pady=5)
+        self.takeoff_follower_button.grid(row=0, column=1, padx=10, pady=5)
 
-        self.theme_button = customtkinter.CTkButton(
-            self.shared_frame,
-            text="Toggle Theme",
-            command=self.toggle_theme,
-            fg_color="#333333",
+        self.land_follower_button = customtkinter.CTkButton(
+            master=self.footer,
+            text="Land Follower",
+            command=self.land_callback_follower,
         )
-        self.theme_button.pack(pady=5)
+        self.land_follower_button.grid(row=1, column=1, padx=10, pady=5)
 
-    def get_ip_address(self):
-        return self.ip_entry.get()
-
-    def get_drone_type(self):
-        return self.drone_type_combobox.get()
-
-    def is_follow_me_enabled(self):
-        return self.follow_me_var.get()
-
-    def toggle_theme(self):
-        if customtkinter.get_appearance_mode() == "Dark":
+    def switch_appearance(self):
+        if customtkinter.get_appearance_mode() == "dark":
             customtkinter.set_appearance_mode("light")
         else:
             customtkinter.set_appearance_mode("dark")
 
-        # Follower Frame
-        self.ip_label = customtkinter.CTkLabel(
-            self.follower_frame, text="Follower Drone IP:", fg_color="#333333"
-        )
-        self.ip_label.pack()
-        self.ip_entry = customtkinter.CTkEntry(self.follower_frame, fg_color="#333333")
-        self.ip_entry.pack()
-
-        self.drone_type_label = customtkinter.CTkLabel(
-            self.follower_frame, text="Follower Drone Type:", fg_color="#333333"
-        )
-        self.drone_type_label.pack()
-        self.drone_type_combobox = customtkinter.CTkComboBox(
-            self.follower_frame, values=drone_type_options, fg_color="#333333"
-        )
-        self.drone_type_combobox.pack()
-
-        self.takeoff_button = customtkinter.CTkButton(
-            self.follower_frame,
-            text="Takeoff",
-            fg_color="#333333",
-            command=self.takeoff,
-        )
-        self.takeoff_button.pack(pady=5)
-
-        self.land_button = customtkinter.CTkButton(
-            self.follower_frame, text="Land", fg_color="#333333", command=self.land
-        )
-        self.land_button.pack(pady=5)
-
 
 if __name__ == "__main__":
-    app = UI(["Bebop", "Mavsdk", "Olympe"])
-    app.mainloop()
+    callbacks_commands = {
+        "takeoff_leader": lambda: print("takeoff leader"),
+        "land_leader": lambda: print("land leader"),
+        "follow_me": lambda: print("follow me"),
+        "takeoff_follower": lambda: print("takeoff follower"),
+        "land_follower": lambda: print("land follower"),
+    }
+    ui = UI(callbacks_commands)
+    ui.mainloop()
