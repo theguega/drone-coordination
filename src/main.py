@@ -1,11 +1,31 @@
 import argparse
 import asyncio
 
+from commanders.bebop_commander import BebopCommander
 from commanders.mavsdk_commander import MAVSDKCommander
 from commanders.olympe_commander import OlympeCommander
-
-# from commanders.bebop_commander import BebopCommander
 from follow_logic import follow_loop
+from src.ui import UI
+
+
+async def run_follow_logic(args):
+    # Instantiate commanders
+    leader = MAVSDKCommander(args.mavsdk_drone)
+    if args.olympe_drone:
+        follower = OlympeCommander(args.olympe_drone)
+    elif args.bebop_drone:
+        follower = BebopCommander(args.bebop_drone)
+    else:
+        raise ValueError("Must specify either --olympe_drone or --bebop_drone")
+
+    # Connect to both drones
+    await asyncio.gather(leader.connect(), follower.connect())
+
+    # Run follow-me behavior
+    await follow_loop(leader, follower)
+
+    # Disconnect
+    await asyncio.gather(leader.disconnect(), follower.disconnect())
 
 
 async def run():
@@ -18,23 +38,16 @@ async def run():
     group.add_argument("--bebop_drone", help="Parrot Bebop IP (future)")
     args = parser.parse_args()
 
-    # Instantiate commanders
-    leader = MAVSDKCommander(args.mavsdk_drone)
-    if args.olympe_drone:
-        follower = OlympeCommander(args.olympe_drone)
-    else:
-        # from commanders.bebop_commander import BebopCommander
-        # follower = BebopCommander(args.bebop_drone)
-        pass
+    # Run the UI
+    drone_type_options = ["Bebop", "Mavsdk", "Olympe"]
+    ui = UI(drone_type_options)
 
-    # Connect to both drones
-    await asyncio.gather(leader.connect(), follower.connect())
+    def start_follow_logic():
+        asyncio.create_task(run_follow_logic(args))
 
-    # Run follow-me behavior
-    await follow_loop(leader, follower)
+    ui.button1.configure(command=start_follow_logic)  # Assign follow logic to button1
 
-    # Disconnect
-    await asyncio.gather(leader.disconnect(), follower.disconnect())
+    ui.mainloop()
 
 
 if __name__ == "__main__":
