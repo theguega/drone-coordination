@@ -4,7 +4,7 @@
 
 ## 🔧 Prerequisites
 
-- Ubuntu
+- Ubuntu (Xorg for tkinter)
 - Docker
 - uv for Python virtualenv
 

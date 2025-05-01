@@ -1,10 +1,13 @@
 import asyncio
+import traceback
 from typing import Tuple
 
 import roslaunch
 import rospy
 from sensor_msgs.msg import NavSatFix
 from std_msgs.msg import Empty
+
+from .base_commander import BaseCommander
 
 
 class BebopCommander(BaseCommander):
@@ -52,52 +55,53 @@ class BebopCommander(BaseCommander):
         # Give driver a moment to start up
         await asyncio.sleep(2.0)
         # Send the takeoff command
-        self.takeoff_pub.publish(
-            Empty()
-        )  # takes off the drone :contentReference[oaicite:5]{index=5}
+        self.takeoff_pub.publish(Empty())  # takes off the drone :contentReference[oaicite:5]{index=5}
 
     async def disconnect(self) -> None:
         """
         Shutdown the ROS driver. Optionally land first.
         """
-        # Land if still flying
-        if self.land_pub:
-            self.land_pub.publish(
-                Empty()
-            )  # lands the drone :contentReference[oaicite:6]{index=6}
-            await asyncio.sleep(2.0)
+        try:
+            # Land if still flying
+            if self.land_pub:
+                print(f"[Bebop] Landing drone at {self.address}")
+                self.land_pub.publish(Empty())  # lands the drone
+                await asyncio.sleep(2.0)
 
-        # Shutdown the launch file
-        if self.launch:
-            self.launch.shutdown()
+            # Shutdown the launch file
+            if self.launch:
+                print(f"[Bebop] Shutting down ROS driver for {self.address}")
+                self.launch.shutdown()
+
+            print(f"[Bebop] Disconnected from {self.address}")
+        except Exception as e:
+            print(f"[Bebop] Error during disconnect: {e}")
+            traceback.print_exc()
 
     async def get_position(self) -> Tuple[float, float, float]:
         """
         Wait for one NavSatFix message and return (lat, lon, alt).
         """
         topic = f"/{self.namespace}/fix"
-        msg: NavSatFix = rospy.wait_for_message(
-            topic, NavSatFix, timeout=5.0
-        )  # GPS fix :contentReference[oaicite:7]{index=7}
+        msg: NavSatFix = rospy.wait_for_message(topic, NavSatFix, timeout=5.0)  # GPS fix :contentReference[oaicite:7]{index=7}
         return msg.latitude, msg.longitude, msg.altitude
 
-    async def goto_position(
-        self, latitude: float, longitude: float, altitude: float
-    ) -> None:
+    async def goto_position(self, latitude: float, longitude: float, altitude: float) -> None:
         """
         Stub: bebop_autonomy does not support waypoint navigation natively.
         To implement, consider publishing velocity commands to /<ns>/cmd_vel
         or using the onboard flight-plan API (autoflight/start, etc.). :contentReference[oaicite:8]{index=8}
         """
-        raise NotImplementedError(
-            "Waypoint navigation requires a custom controller or use of the Bebop's flight-plan API."
-        )
+        raise NotImplementedError("Waypoint navigation requires a custom controller or use of the Bebop's flight-plan API.")
 
     async def land(self) -> None:
         """
         Land the drone immediately.
         """
-        if self.land_pub:
-            self.land_pub.publish(
-                Empty()
-            )  # lands the drone :contentReference[oaicite:9]{index=9}
+        try:
+            if self.land_pub:
+                print(f"[Bebop] Landing drone at {self.address}")
+                self.land_pub.publish(Empty())  # lands the drone
+        except Exception as e:
+            print(f"[Bebop] Error landing drone: {e}")
+            traceback.print_exc()

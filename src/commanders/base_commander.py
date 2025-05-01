@@ -28,9 +28,7 @@ class BaseCommander(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def goto_position(
-        self, latitude: float, longitude: float, altitude: float
-    ) -> None:
+    async def goto_position(self, latitude: float, longitude: float, altitude: float) -> None:
         """
         Command drone to fly to specified GPS position.
         """
