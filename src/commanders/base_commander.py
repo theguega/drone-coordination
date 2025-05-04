@@ -16,6 +16,11 @@ class BaseCommander(abc.ABC):
         pass
 
     @abc.abstractmethod
+    async def takeoff(self) -> None:
+        """Takeoff the drone."""
+        pass
+
+    @abc.abstractmethod
     async def disconnect(self) -> None:
         """Terminate connection to the drone."""
         pass
@@ -38,5 +43,24 @@ class BaseCommander(abc.ABC):
     async def land(self) -> None:
         """
         Land the drone safely.
+        """
+        pass
+
+    @abc.abstractmethod
+    async def prepare_for_drop(self) -> None:
+        """Prepare the drone to be dropped from a fixed height and takeoff."""
+        pass
+
+    @abc.abstractmethod
+    async def set_camera_angle(self, angle: float) -> None:
+        """
+        Set camera angle in degrees (-90 to 90) with -90 being straight down.
+        """
+        pass
+
+    @abc.abstractmethod
+    async def set_pcmds(self, roll: float, pitch: float, yaw: float, gaz: float) -> None:
+        """
+        Set the drone's pitch/roll/yaw/gaz commands.
         """
         pass

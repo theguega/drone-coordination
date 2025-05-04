@@ -1,5 +1,4 @@
 import asyncio
-import sys
 from typing import Tuple
 
 from mavsdk import System
@@ -8,6 +7,7 @@ from .base_commander import BaseCommander
 
 MAX_RETRY = 5
 CONNECTION_TIMEOUT = 2
+TAKEOFF_ALTITUDE = 5
 
 
 class MAVSDKCommander(BaseCommander):
@@ -33,9 +33,7 @@ class MAVSDKCommander(BaseCommander):
                         print("[MAVSDK] Global position OK")
                         break
 
-                await self.drone.action.arm()
-                print("VTOL Armed")
-                return
+                print("[MAVSDK] VTOL connected")
 
             except (asyncio.TimeoutError, Exception) as e:
                 print(f"[MAVSDK] Connection attempt {attempt} failed: {e}")
@@ -80,3 +78,54 @@ class MAVSDKCommander(BaseCommander):
 
     async def land(self) -> None:
         await self.drone.action.land()
+
+    async def takeoff(self) -> None:
+        await self.drone.action.arm()
+
+        await self.drone.manual_control.set_manual_control_input(float(0), float(0), float(0.5), float(0))
+
+        await self.drone.action.set_takeoff_altitude(float(TAKEOFF_ALTITUDE))
+        await self.drone.action.takeoff()
+
+    async def prepare_for_drop(self) -> None:
+        raise NotImplementedError("prepare_for_drop not implemented for MAVSDKCommander")
+
+    async def set_camera_angle(self, angle: float) -> None:
+        raise NotImplementedError("set_camera_angle not implemented for MAVSDKCommander")
+
+    async def set_pcmds(self, roll: float, pitch: float, yaw: float, gaz: float) -> None:
+        """
+        Input :
+        roll : float
+        pitch : float
+        yaw : float
+        gaz : float
+
+        They are expressed as joytsitck values in the range [-100, 100]
+
+        MAVSDK documentation:
+        Set manual control input
+
+        The manual control input needs to be sent at a rate high enough to prevent triggering of RC loss, a good minimum rate is 10 Hz.
+
+        Parameters:
+
+                x (float) – value between -1. to 1. negative -> backwards, positive -> forwards
+
+                y (float) – value between -1. to 1. negative -> left, positive -> right
+
+                z (float) – value between -1. to 1. negative -> down, positive -> up (usually for now, for multicopter 0 to 1 is expected)
+
+                r (float) – value between -1. to 1. negative -> turn anti-clockwise (towards the left), positive -> turn clockwise (towards the right)
+
+        Raises:
+
+            ManualControlError – If the request fails. The error contains the reason for the failure.
+        """
+
+        y = float(roll) / 100.0
+        x = float(pitch) / 100.0
+        r = float(yaw) / 100.0
+        z = float(gaz) / 100.0 / 2.0 + 0.5
+
+        await self.drone.manual_control.set_manual_control_input(x, y, z, r)

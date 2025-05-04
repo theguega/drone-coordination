@@ -4,7 +4,9 @@ from typing import Tuple
 
 from geographiclib.geodesic import Geodesic
 
-from commanders.base_commander import BaseCommander
+from commanders.bebop_commander import BebopCommander
+from commanders.mavsdk_commander import MAVSDKCommander
+from commanders.olympe_commander import OlympeCommander
 
 # Follow-me constants
 MIN_DIST_M = 10.0
@@ -24,20 +26,20 @@ def compute_follow_point(
     along the line toward the follower.
     """
     # Use the WGS84 ellipsoid parameters
-    geod = Geodesic(6378137, 1/298.257223563)  # WGS84 parameters (a=semi-major axis, f=flattening)
+    geod = Geodesic(6378137, 1 / 298.257223563)  # WGS84 parameters (a=semi-major axis, f=flattening)
     inv = geod.Inverse(leader_lat, leader_lon, follower_lat, follower_lon)
     bearing = inv["azi1"]
     dest = geod.Direct(leader_lat, leader_lon, bearing, distance)
     return dest["lat2"], dest["lon2"]
 
 
-async def follow_loop(leader: BaseCommander, follower: BaseCommander, interval: float = 1.0) -> None:
+async def follow_loop(leader: MAVSDKCommander, follower: OlympeCommander | BebopCommander, interval: float = 1.0) -> None:
     """
     Continuously compute and send follow-me commands
     until drones come closer than MIN_DIST, then land follower.
     """
     # Use the WGS84 ellipsoid parameters
-    geod = Geodesic(6378137, 1/298.257223563)  # WGS84 parameters (a=semi-major axis, f=flattening)
+    geod = Geodesic(6378137, 1 / 298.257223563)  # WGS84 parameters (a=semi-major axis, f=flattening)
     try:
         while True:
             # Retrieve positions
@@ -60,17 +62,19 @@ async def follow_loop(leader: BaseCommander, follower: BaseCommander, interval: 
             await follower.goto_position(tgt_lat, tgt_lon, tgt_alt)
             await asyncio.sleep(interval)
     except asyncio.CancelledError:
-        print("Follow loop cancelled – landing follower.")
+        print("Follow loop cancelled – stopping both drones by sending pcmds")
         try:
-            await follower.land()
+            await leader.set_pcmds(0, 0, 0, 0)
+            await follower.set_pcmds(0, 0, 0, 0)
         except Exception as e:
-            print(f"Error landing follower after cancellation: {e}")
+            print(f"Error stopping drones: {e}")
     except KeyboardInterrupt:
-        print("Interrupted by user – landing follower.")
+        print("Follow loop cancelled – stopping both drones by sending pcmds")
         try:
-            await follower.land()
+            await leader.set_pcmds(0, 0, 0, 0)
+            await follower.set_pcmds(0, 0, 0, 0)
         except Exception as e:
-            print(f"Error landing follower after interruption: {e}")
+            print(f"Error stopping drones: {e}")
     except Exception as e:
         print(f"Error in follow loop: {e}")
         traceback.print_exc()
