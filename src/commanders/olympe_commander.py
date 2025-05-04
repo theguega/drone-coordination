@@ -11,6 +11,8 @@ olympe.log.update_config({"loggers": {"olympe": {"level": "ERROR"}}})
 
 from .base_commander import BaseCommander
 
+# check documentation for takeoff not from the ground
+# command message olympe.messages.ardrone3.Piloting.UserTakeOff(state, _timeout=10, _no_expect=False, _float_tol=(1e-07, 1e-09))
 
 class OlympeCommander(BaseCommander):
     def __init__(self, address: str):
