@@ -2,7 +2,7 @@ import time
 from typing import Tuple
 
 import olympe
-from olympe.messages.ardrone3.Piloting import PCMD, Landing, Takeoff, UserTakeOff, moveTo
+from olympe.messages.ardrone3.Piloting import PCMD, Landing, TakeOff, UserTakeOff, moveTo
 from olympe.messages.ardrone3.PilotingState import PositionChanged
 
 MAX_RETRY = 1

@@ -4,7 +4,6 @@ from typing import Tuple
 
 from geographiclib.geodesic import Geodesic
 
-from commanders.bebop_commander import BebopCommander
 from commanders.mavsdk_commander import MAVSDKCommander
 from commanders.olympe_commander import OlympeCommander
 
@@ -33,7 +32,7 @@ def compute_follow_point(
     return dest["lat2"], dest["lon2"]
 
 
-async def follow_loop(leader: MAVSDKCommander, follower: OlympeCommander | BebopCommander, interval: float = 1.0) -> None:
+async def follow_loop(leader: MAVSDKCommander, follower: OlympeCommander, interval: float = 1.0) -> None:
     """
     Continuously compute and send follow-me commands
     until drones come closer than MIN_DIST, then land follower.

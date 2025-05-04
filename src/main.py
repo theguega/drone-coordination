@@ -1,12 +1,11 @@
 import argparse
 import asyncio
 import signal
-import sys
 import traceback
 
 from commanders.mavsdk_commander import MAVSDKCommander
 from commanders.olympe_commander import OlympeCommander
-from follow_logic import follow_loop
+from utils import follow_loop
 
 
 async def show_help():
@@ -15,6 +14,7 @@ async def show_help():
     print("/takeoff_follower - Follower drone takeoff")
     print("/follow - Start following logic")
     print("/help - Show this help message")
+    print("/prepare_for_drop - Prepare follower to be bropped from the leader drone")
     print("Ctrl-C to exit")
 
 
@@ -31,6 +31,13 @@ async def handle_command(command, leader, follower):
                 await follow_loop(leader, follower)
             except Exception as e:
                 print(f"Error in follow loop: {e}")
+                traceback.print_exc()
+        case "/prepare_for_drop":
+            print(("Preparing follower to be bropped from the leader drone..."))
+            try:
+                await follower.prepare_for_drop()
+            except Exception as e:
+                print(f"Error preparing drone for drop: {e}")
                 traceback.print_exc()
         case "/help":
             await show_help()
@@ -75,6 +82,7 @@ async def cleanup(leader, follower):
     if tasks:
         await asyncio.gather(*tasks, return_exceptions=True)
     print("Cleanup completed.")
+
 
 # Main entry point
 async def run():
@@ -131,6 +139,7 @@ def signal_handler(sig, frame):
     print(f"\nReceived signal {sig}. Exiting gracefully...")
     # This will raise a KeyboardInterrupt in the main thread
     raise KeyboardInterrupt()
+
 
 if __name__ == "__main__":
     # Register signal handlers for graceful shutdown
