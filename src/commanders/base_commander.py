@@ -33,7 +33,9 @@ class BaseCommander(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def goto_position(self, latitude: float, longitude: float, altitude: float) -> None:
+    async def goto_position(
+        self, latitude: float, longitude: float, altitude: float
+    ) -> None:
         """
         Command drone to fly to specified GPS position.
         """
@@ -59,7 +61,9 @@ class BaseCommander(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def set_pcmds(self, roll: float, pitch: float, yaw: float, gaz: float) -> None:
+    async def set_pcmds(
+        self, roll: float, pitch: float, yaw: float, gaz: float
+    ) -> None:
         """
         Set the drone's pitch/roll/yaw/gaz commands.
         """

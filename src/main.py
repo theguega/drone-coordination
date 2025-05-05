@@ -5,24 +5,22 @@ import traceback
 
 from commanders.mavsdk_commander import MAVSDKCommander
 from commanders.olympe_commander import OlympeCommander
-from utils import follow_loop
+from utils import follow_loop, manual_control
 
 
 async def show_help():
     print("Help: Use the following commands:")
-    print("/takeoff_leader - Leader drone takeoff")
     print("/takeoff_follower - Follower drone takeoff")
     print("/follow - Start following logic")
+    print("/prepare_for_release - Prepare follower to be dropped from the leader drone")
+    print("/control_follower - Control follower drone with RC")
     print("/help - Show this help message")
-    print("/prepare_for_drop - Prepare follower to be bropped from the leader drone")
     print("Ctrl-C to exit")
 
 
 async def handle_command(command, leader, follower):
     """Match the command and call the appropriate function."""
     match command:
-        case "/takeoff_leader":
-            print("takeoff_leader")
         case "/takeoff_follower":
             print("takeoff_follower")
         case "/follow":
@@ -32,12 +30,18 @@ async def handle_command(command, leader, follower):
             except Exception as e:
                 print(f"Error in follow loop: {e}")
                 traceback.print_exc()
-        case "/prepare_for_drop":
+        case "/prepare_for_release":
             print(("Preparing follower to be bropped from the leader drone..."))
             try:
-                await follower.prepare_for_drop()
+                await follower.prepare_for_release()
             except Exception as e:
                 print(f"Error preparing drone for drop: {e}")
+                traceback.print_exc()
+        case "/control_follower":
+            try:
+                await manual_control(follower)
+            except Exception as e:
+                print(f"Error in manual control: {e}")
                 traceback.print_exc()
         case "/help":
             await show_help()
@@ -89,11 +93,22 @@ async def run():
     parser = argparse.ArgumentParser(description="Follow-me between two drones")
 
     # Require that --mavsdk_drone is used, even if the address is not specified
-    parser.add_argument("--mavsdk_drone", help="MAVSDK connection string (default: udp://:14540)", nargs="?", const="udp://:14540", default=None)
+    parser.add_argument(
+        "--mavsdk_drone",
+        help="MAVSDK connection string (default: udp://:14540)",
+        nargs="?",
+        const="udp://:14540",
+        default=None,
+    )
 
     # Either --olympe_drone or --bebop_drone must be provided, but their values are optional
-    parser.add_argument("--olympe_drone", help="Parrot Olympe IP (optional)", nargs="?", const="10.202.0.1", default=None)
-    parser.add_argument("--bebop_drone", help="Parrot Bebop IP (optional)", nargs="?", const="127.0.0.1", default=None)
+    parser.add_argument(
+        "--olympe_drone",
+        help="Parrot Olympe IP (optional)",
+        nargs="?",
+        const="10.202.0.1",
+        default=None,
+    )
 
     args = parser.parse_args()
 
@@ -103,7 +118,9 @@ async def run():
 
     # Enforce at least one of --olympe_drone or --bebop_drone must be provided
     if args.olympe_drone is None and args.bebop_drone is None:
-        parser.error("At least one of --olympe_drone or --bebop_drone must be specified (addresses are optional)")
+        parser.error(
+            "At least one of --olympe_drone or --bebop_drone must be specified (addresses are optional)"
+        )
 
     leader = None
     follower = None
@@ -114,8 +131,6 @@ async def run():
     if args.olympe_drone:
         follower = OlympeCommander(args.olympe_drone)
         print("Using Olympe commander as follower with address", args.olympe_drone)
-    elif args.bebop_drone:
-        raise NotImplementedError("Bebop commander not implemented yet")
     else:
         raise ValueError("No drone specified")
 
