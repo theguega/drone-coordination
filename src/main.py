@@ -13,7 +13,7 @@ async def show_help():
     print("/takeoff_follower - Follower drone takeoff")
     print("/follow - Start following logic")
     print("/prepare_for_release - Prepare follower to be dropped from the leader drone")
-    print("/control_follower - Control follower drone with RC")
+    print("/manual - Control follower drone with RC")
     print("/help - Show this help message")
     print("Ctrl-C to exit")
 
@@ -37,7 +37,7 @@ async def handle_command(command, leader, follower):
             except Exception as e:
                 print(f"Error preparing drone for drop: {e}")
                 traceback.print_exc()
-        case "/control_follower":
+        case "/manual":
             try:
                 await manual_control(follower)
             except Exception as e:
@@ -118,9 +118,7 @@ async def run():
 
     # Enforce at least one of --olympe_drone or --bebop_drone must be provided
     if args.olympe_drone is None and args.bebop_drone is None:
-        parser.error(
-            "At least one of --olympe_drone or --bebop_drone must be specified (addresses are optional)"
-        )
+        parser.error("At least one of --olympe_drone or --bebop_drone must be specified (addresses are optional)")
 
     leader = None
     follower = None
@@ -134,14 +132,14 @@ async def run():
     else:
         raise ValueError("No drone specified")
 
-    if leader and follower:
-        try:
-            task = asyncio.gather(leader.connect(), follower.connect())
-            await task
-        except Exception as e:
-            print(f"Error connecting to drones: {e}")
-            await cleanup(leader, follower)
-            return
+    # if leader and follower:
+    #     try:
+    #         task = asyncio.gather(leader.connect(), follower.connect())
+    #         await task
+    #     except Exception as e:
+    #         print(f"Error connecting to drones: {e}")
+    #         await cleanup(leader, follower)
+    #         return
 
     try:
         await listen_for_commands(leader, follower)

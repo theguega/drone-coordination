@@ -1,5 +1,4 @@
 import asyncio
-import time
 import traceback
 from typing import Tuple
 
@@ -29,26 +28,20 @@ def compute_follow_point(
     along the line toward the follower.
     """
     # Use the WGS84 ellipsoid parameters
-    geod = Geodesic(
-        6378137, 1 / 298.257223563
-    )  # WGS84 parameters (a=semi-major axis, f=flattening)
+    geod = Geodesic(6378137, 1 / 298.257223563)  # WGS84 parameters (a=semi-major axis, f=flattening)
     inv = geod.Inverse(leader_lat, leader_lon, follower_lat, follower_lon)
     bearing = inv["azi1"]
     dest = geod.Direct(leader_lat, leader_lon, bearing, distance)
     return dest["lat2"], dest["lon2"]
 
 
-async def follow_loop(
-    leader: MAVSDKCommander, follower: OlympeCommander, interval: float = 1.0
-) -> None:
+async def follow_loop(leader: MAVSDKCommander, follower: OlympeCommander, interval: float = 1.0) -> None:
     """
     Continuously compute and send follow-me commands
     until drones come closer than MIN_DIST, then land follower.
     """
     # Use the WGS84 ellipsoid parameters
-    geod = Geodesic(
-        6378137, 1 / 298.257223563
-    )  # WGS84 parameters (a=semi-major axis, f=flattening)
+    geod = Geodesic(6378137, 1 / 298.257223563)  # WGS84 parameters (a=semi-major axis, f=flattening)
     try:
         while True:
             # Retrieve positions
@@ -63,13 +56,9 @@ async def follow_loop(
                 break
 
             # Compute target follow point and desired altitude
-            tgt_lat, tgt_lon = compute_follow_point(
-                lead_lat, lead_lon, foll_lat, foll_lon, FOLLOW_DIST_M
-            )
+            tgt_lat, tgt_lon = compute_follow_point(lead_lat, lead_lon, foll_lat, foll_lon, FOLLOW_DIST_M)
             tgt_alt = lead_alt + ALT_OFFSET_M
-            print(
-                f"Moving follower to {tgt_lat:.6f}, {tgt_lon:.6f}, alt {tgt_alt:.1f}m"
-            )
+            print(f"Moving follower to {tgt_lat:.6f}, {tgt_lon:.6f}, alt {tgt_alt:.1f}m")
 
             # Send command
             await follower.goto_position(tgt_lat, tgt_lon, tgt_alt)
@@ -95,54 +84,81 @@ async def follow_loop(
             print(f"Error landing follower after exception: {land_error}")
 
 
-def manual_control(drone: OlympeCommander) -> None:
+async def manual_control(drone: OlympeCommander) -> None:
     """
-    Continuously read RC commands and send them to the drone.
+    Continuously read PS4 controller commands and send them to the drone.
+    Only sends commands when values are updated.
+    Implements a deadzone to prevent drift when joysticks are near center.
+    Focuses only on joystick inputs.
     """
-    print("Manual control started. Press Ctrl-C to stop.")
-
+    print("PS4 manual control started. Press Ctrl-C to stop.")
     try:
         # Initialize joystick
         joysticks = inputs.devices.gamepads
         if not joysticks:
             print("No gamepad detected. Please connect one.")
             return
-
         joystick = joysticks[0]
         print(f"Using joystick: {joystick}")
 
+        # Store current state of controls
+        control_state = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0, "throttle": 0.0}
+        previous_state = control_state.copy()
+
+        # Define deadzone - adjust this value as needed
+        DEADZONE = 0.01
+
+        def apply_deadzone(value):
+            """Apply deadzone to prevent drift when joystick is near center"""
+            if abs(value) < DEADZONE:
+                return 0.0
+            # Smooth out the transition from deadzone to full range
+            adjusted_value = (abs(value) - DEADZONE) / (1.0 - DEADZONE)
+            return adjusted_value if value > 0 else -adjusted_value
+
         while True:
             events = joystick.read()
-            if DEBUG:
-                print(f"Events: {events}")
+
             for event in events:
-                # Map joystick inputs to pcmd values (replace with your mapping)
-                roll = 0.0
-                pitch = 0.0
-                yaw = 0.0
-                throttle = 0.0
+                print(f"code : {event.code}, state : {event.state}\n")
 
-                if event.code == "ABS_X":  # Example: Roll
-                    roll = event.state / 32768.0  # Normalize to -1.0 to 1.0
-                elif event.code == "ABS_Y":  # Example: Pitch
-                    pitch = -event.state / 32768.0  # Normalize and invert
-                elif event.code == "ABS_RX":  # Example: Yaw
-                    yaw = event.state / 32768.0  # Normalize
-                elif event.code == "ABS_RY":  # Example: Throttle
-                    throttle = (
-                        event.state + 32768
-                    ) / 65535.0  # Normalize to 0.0 to 1.0
+            updated = False
 
-                # Send pcmds to the drone
-                drone.set_pcmds(roll, pitch, yaw, throttle)
+            for event in events:
+                # Only process joystick events (ignore buttons)
+                if event.code == "ABS_X":  # Left stick horizontal - Roll
+                    value = event.state / 32768.0  # Normalize to -1.0 to 1.0
+                    control_state["roll"] = apply_deadzone(value)
+                    updated = True
 
-            time.sleep(0.01)  # Adjust sleep time as needed
+                elif event.code == "ABS_Y":  # Left stick vertical - Pitch
+                    value = -event.state / 32768.0  # Normalize and invert
+                    control_state["pitch"] = apply_deadzone(value)
+                    updated = True
 
-    except KeyboardInterrupt:
-        print("Manual control stopped.")
-        drone.set_pcmds(0, 0, 0, 0)  # Stop the drone
+                elif event.code == "ABS_RX":  # Right stick horizontal - Yaw
+                    value = event.state / 32768.0  # Normalize
+                    control_state["yaw"] = apply_deadzone(value)
+                    updated = True
+
+                elif event.code == "ABS_RY":  # Right stick vertical - Throttle
+                    value = -event.state / 32768.0  # Normalize and invert
+                    # For throttle, we map from -1,1 to 0,1 range
+                    normalized_value = (value + 1.0) / 2.0
+                    control_state["throttle"] = apply_deadzone(normalized_value * 2.0) / 2.0 if normalized_value < 0.5 else normalized_value
+                    updated = True
+
+            # Check if any values have changed significantly from previous state
+            if updated and any(abs(control_state[key] - previous_state[key]) > 0.01 for key in control_state):
+                await drone.set_pcmds(control_state["roll"], control_state["pitch"], control_state["yaw"], control_state["throttle"])
+                print(control_state)
+                previous_state = control_state.copy()
+
+            await asyncio.sleep(0.01)
 
     except Exception as e:
         print(f"Error in manual control: {e}")
-        traceback.print_exc()
-        drone.set_pcmds(0, 0, 0, 0)  # Stop the drone
+    finally:
+        # Ensure drone stops if control is interrupted
+        await drone.set_pcmds(0.0, 0.0, 0.0, 0.0)
+        print("Manual control terminated.")
