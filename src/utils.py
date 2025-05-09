@@ -2,11 +2,11 @@ import asyncio
 import traceback
 from typing import Tuple
 
-import inputs
 from geographiclib.geodesic import Geodesic
 
 from commanders.mavsdk_commander import MAVSDKCommander
 from commanders.olympe_commander import OlympeCommander
+from controller import MyController
 
 DEBUG = True
 
@@ -84,81 +84,29 @@ async def follow_loop(leader: MAVSDKCommander, follower: OlympeCommander, interv
             print(f"Error landing follower after exception: {land_error}")
 
 
-async def manual_control(drone: OlympeCommander) -> None:
-    """
-    Continuously read PS4 controller commands and send them to the drone.
-    Only sends commands when values are updated.
-    Implements a deadzone to prevent drift when joysticks are near center.
-    Focuses only on joystick inputs.
-    """
-    print("PS4 manual control started. Press Ctrl-C to stop.")
+async def manual_control(follower) -> None:
+    """Continuously read PS4 controller commands and send them to the drone."""
     try:
-        # Initialize joystick
-        joysticks = inputs.devices.gamepads
-        if not joysticks:
-            print("No gamepad detected. Please connect one.")
-            return
-        joystick = joysticks[0]
-        print(f"Using joystick: {joystick}")
-
-        # Store current state of controls
-        control_state = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0, "throttle": 0.0}
-        previous_state = control_state.copy()
-
-        # Define deadzone - adjust this value as needed
-        DEADZONE = 0.01
-
-        def apply_deadzone(value):
-            """Apply deadzone to prevent drift when joystick is near center"""
-            if abs(value) < DEADZONE:
-                return 0.0
-            # Smooth out the transition from deadzone to full range
-            adjusted_value = (abs(value) - DEADZONE) / (1.0 - DEADZONE)
-            return adjusted_value if value > 0 else -adjusted_value
-
-        while True:
-            events = joystick.read()
-
-            for event in events:
-                print(f"code : {event.code}, state : {event.state}\n")
-
-            updated = False
-
-            for event in events:
-                # Only process joystick events (ignore buttons)
-                if event.code == "ABS_X":  # Left stick horizontal - Roll
-                    value = event.state / 32768.0  # Normalize to -1.0 to 1.0
-                    control_state["roll"] = apply_deadzone(value)
-                    updated = True
-
-                elif event.code == "ABS_Y":  # Left stick vertical - Pitch
-                    value = -event.state / 32768.0  # Normalize and invert
-                    control_state["pitch"] = apply_deadzone(value)
-                    updated = True
-
-                elif event.code == "ABS_RX":  # Right stick horizontal - Yaw
-                    value = event.state / 32768.0  # Normalize
-                    control_state["yaw"] = apply_deadzone(value)
-                    updated = True
-
-                elif event.code == "ABS_RY":  # Right stick vertical - Throttle
-                    value = -event.state / 32768.0  # Normalize and invert
-                    # For throttle, we map from -1,1 to 0,1 range
-                    normalized_value = (value + 1.0) / 2.0
-                    control_state["throttle"] = apply_deadzone(normalized_value * 2.0) / 2.0 if normalized_value < 0.5 else normalized_value
-                    updated = True
-
-            # Check if any values have changed significantly from previous state
-            if updated and any(abs(control_state[key] - previous_state[key]) > 0.01 for key in control_state):
-                await drone.set_pcmds(control_state["roll"], control_state["pitch"], control_state["yaw"], control_state["throttle"])
-                print(control_state)
-                previous_state = control_state.copy()
-
-            await asyncio.sleep(0.01)
-
+        controller = MyController(drone=follower, interface="/dev/input/js1", connecting_using_ds4drv=False)
+        controller.listen()
+    except asyncio.CancelledError:
+        print("Manual control loop cancelled – stopping both drones by sending pcmds")
+        try:
+            await follower.set_pcmds(0, 0, 0, 0)
+        except Exception as e:
+            print(f"Error stopping drones: {e}")
+    except KeyboardInterrupt:
+        print("Follow loop cancelled – stopping both drones by sending pcmds")
+        try:
+            await follower.set_pcmds(0, 0, 0, 0)
+        except Exception as e:
+            print(f"Error stopping drones: {e}")
     except Exception as e:
-        print(f"Error in manual control: {e}")
+        print(f"Error in follow loop: {e}")
+        traceback.print_exc()
+        try:
+            await follower.land()
+        except Exception as land_error:
+            print(f"Error landing follower after exception: {land_error}")
     finally:
-        # Ensure drone stops if control is interrupted
-        await drone.set_pcmds(0.0, 0.0, 0.0, 0.0)
-        print("Manual control terminated.")
+        print("should destroy controller here")

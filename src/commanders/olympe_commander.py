@@ -1,4 +1,4 @@
-import time
+import asyncio
 from typing import Tuple
 
 import olympe
@@ -25,7 +25,8 @@ class OlympeCommander(BaseCommander):
                 return
             else:
                 print(f"[Olympe] Connection attempt {attempt} failed.")
-                time.sleep(2)
+                await asyncio.sleep(2)
+
         raise TimeoutError(f"[OLympe] Failed to connect to {self.address} after {MAX_RETRY} attempts.")
 
     async def disconnect(self) -> None:

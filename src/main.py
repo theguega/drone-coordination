@@ -15,6 +15,7 @@ async def show_help():
     print("/prepare_for_release - Prepare follower to be dropped from the leader drone")
     print("/manual - Control follower drone with RC")
     print("/help - Show this help message")
+    print("/exit - Exit")
     print("Ctrl-C to exit")
 
 
@@ -25,24 +26,16 @@ async def handle_command(command, leader, follower):
             print("takeoff_follower")
         case "/follow":
             print("Starting follow loop...")
-            try:
-                await follow_loop(leader, follower)
-            except Exception as e:
-                print(f"Error in follow loop: {e}")
-                traceback.print_exc()
+            await follow_loop(leader, follower)
         case "/prepare_for_release":
             print(("Preparing follower to be bropped from the leader drone..."))
-            try:
-                await follower.prepare_for_release()
-            except Exception as e:
-                print(f"Error preparing drone for drop: {e}")
-                traceback.print_exc()
+            await follower.prepare_for_release()
         case "/manual":
-            try:
-                await manual_control(follower)
-            except Exception as e:
-                print(f"Error in manual control: {e}")
-                traceback.print_exc()
+            print("Starting manual control loop...")
+            await manual_control(follower)
+        case "/exit":
+            print("Exiting...")
+            raise KeyboardInterrupt()
         case "/help":
             await show_help()
         case _:
@@ -51,14 +44,14 @@ async def handle_command(command, leader, follower):
 
 async def listen_for_commands(leader, follower):
     """Wait for commands asynchronously using signals."""
-    loop = asyncio.get_event_loop()
+    # loop = asyncio.get_event_loop()
 
-    def on_signal_received(signum, frame):
-        """Handles the SIGUSR1 signal and triggers command input."""
-        print("Command received. Please enter your command:")
+    # def on_signal_received(signum, frame):
+    #     """Handles the SIGUSR1 signal and triggers command input."""
+    #     print("Command received. Please enter your command:")
 
-    # Corrected signal handler: passing `signum` and `frame` parameters
-    loop.add_signal_handler(signal.SIGUSR1, on_signal_received, signal.SIGUSR1, None)
+    # # Corrected signal handler: passing `signum` and `frame` parameters
+    # loop.add_signal_handler(signal.SIGUSR1, on_signal_received, signal.SIGUSR1, None)
 
     try:
         while True:
