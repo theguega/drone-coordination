@@ -71,10 +71,8 @@ async def cleanup(leader, follower):
     print("Cleaning up resources...")
     tasks = []
 
-    if leader:
-        tasks.append(leader.disconnect())
     if follower:
-        tasks.append(follower.disconnect())
+        tasks.append(follower.set_pcmds(0, 0, 0, 0))
 
     if tasks:
         await asyncio.gather(*tasks, return_exceptions=True)
