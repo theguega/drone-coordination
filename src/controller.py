@@ -1,15 +1,34 @@
+import asyncio
+import threading
+
 from commanders.mavsdk_commander import JOYSTICK_DEADZONE
 from commanders.olympe_commander import OlympeCommander
 from pyPS4Controller.controller import Controller
 
+# Constants
 JOYSTICK_DEADZONE = 500
 JOYSTICK_SATURATION = 32767
+UPDATE_DEADZONE = 2
+
+# Background asyncio loop
+background_loop = asyncio.new_event_loop()
 
 
+def run_background_loop(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
+
+threading.Thread(target=run_background_loop, args=(background_loop,), daemon=True).start()
+
+
+# Decorator for joystick deadzone
 def apply_joystick_deadzone(function):
     def wrapper(self, value):
         if abs(value) > JOYSTICK_DEADZONE:
             return function(self, value)
+        else:
+            return function(self, 0)
 
     return wrapper
 
@@ -18,13 +37,17 @@ class MyController(Controller):
     def __init__(self, drone: OlympeCommander, **kwargs):
         Controller.__init__(self, **kwargs)
         self.commander = drone
-        self.current_pcmd = {"roll": 0, "pitch": 0, "yaw": 0, "gaz": 0}
+        self.current_pcmd = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0, "gaz": 0.0}
+
+    def _send_pcmds(self):
+        asyncio.run_coroutine_threadsafe(self.commander.set_pcmds(self.current_pcmd.get("roll"), self.current_pcmd.get("pitch"), self.current_pcmd.get("yaw"), self.current_pcmd.get("gaz")), background_loop)
 
     def on_x_press(self):
-        print("on_x_press")
+        asyncio.run_coroutine_threadsafe(self.commander.takeoff(), background_loop)
 
     def on_x_release(self):
-        print("on_x_release")
+        # print("on_x_release")
+        pass
 
     def on_triangle_press(self):
         print("on_triangle_press")
@@ -33,10 +56,11 @@ class MyController(Controller):
         print("on_triangle_release")
 
     def on_circle_press(self):
-        print("on_circle_press")
+        asyncio.run_coroutine_threadsafe(self.commander.land(), background_loop)
 
     def on_circle_release(self):
-        print("on_circle_release")
+        # print("on_circle_release")
+        pass
 
     def on_square_press(self):
         print("on_square_press")
@@ -89,77 +113,85 @@ class MyController(Controller):
     @apply_joystick_deadzone
     def on_L3_up(self, value):
         value = -(value / JOYSTICK_SATURATION) * 100
-        # print("on_L3_up: {}".format(value))
+        if abs(self.current_pcmd["gaz"] - value) > UPDATE_DEADZONE or value == 0:
+            self.current_pcmd["gaz"] = value
+            self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_L3_down(self, value):
         value = -(value / JOYSTICK_SATURATION) * 100
-        # print("on_L3_down: {}".format(value))
+        if abs(self.current_pcmd["gaz"] - value) > UPDATE_DEADZONE or value == 0:
+            self.current_pcmd["gaz"] = value
+            self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_L3_left(self, value):
         value = (value / JOYSTICK_SATURATION) * 100
-        # print("on_L3_left: {}".format(value))
+        if abs(self.current_pcmd["yaw"] - value) > UPDATE_DEADZONE or value == 0:
+            self.current_pcmd["yaw"] = value
+            self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_L3_right(self, value):
         value = (value / JOYSTICK_SATURATION) * 100
-        # print("on_L3_right: {}".format(value))
+        if abs(self.current_pcmd["yaw"] - value) > UPDATE_DEADZONE or value == 0:
+            self.current_pcmd["yaw"] = value
+            self._send_pcmds()
 
     def on_L3_y_at_rest(self):
-        """L3 joystick is at rest after the joystick was moved and let go off"""
-        pass
-        # print("on_L3_y_at_rest")
+        self.current_pcmd["gaz"] = 0
+        self._send_pcmds()
 
     def on_L3_x_at_rest(self):
-        """L3 joystick is at rest after the joystick was moved and let go off"""
-        pass
-        # print("on_L3_x_at_rest")
+        self.current_pcmd["yaw"] = 0
+        self._send_pcmds()
 
     def on_L3_press(self):
-        """L3 joystick is clicked. This event is only detected when connecting without ds4drv"""
         print("on_L3_press")
 
     def on_L3_release(self):
-        """L3 joystick is released after the click. This event is only detected when connecting without ds4drv"""
         print("on_L3_release")
 
     @apply_joystick_deadzone
     def on_R3_up(self, value):
         value = -(value / JOYSTICK_SATURATION) * 100
-        # print("on_R3_up: {}".format(value))
+        if abs(self.current_pcmd["pitch"] - value) > UPDATE_DEADZONE or value == 0:
+            self.current_pcmd["pitch"] = value
+            self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_R3_down(self, value):
         value = -(value / JOYSTICK_SATURATION) * 100
-        # print("on_R3_down: {}".format(value))
+        if abs(self.current_pcmd["pitch"] - value) > UPDATE_DEADZONE or value == 0:
+            self.current_pcmd["pitch"] = value
+            self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_R3_left(self, value):
         value = (value / JOYSTICK_SATURATION) * 100
-        # print("on_R3_left: {}".format(value))
+        if abs(self.current_pcmd["roll"] - value) > UPDATE_DEADZONE or value == 0:
+            self.current_pcmd["roll"] = value
+            self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_R3_right(self, value):
         value = (value / JOYSTICK_SATURATION) * 100
-        # print("on_R3_right: {}".format(value))
+        if abs(self.current_pcmd["roll"] - value) > UPDATE_DEADZONE or value == 0:
+            self.current_pcmd["roll"] = value
+            self._send_pcmds()
 
     def on_R3_y_at_rest(self):
-        """R3 joystick is at rest after the joystick was moved and let go off"""
-        pass
-        # print("on_R3_y_at_rest")
+        self.current_pcmd["pitch"] = 0
+        self._send_pcmds()
 
     def on_R3_x_at_rest(self):
-        """R3 joystick is at rest after the joystick was moved and let go off"""
-        pass
-        # print("on_R3_x_at_rest")
+        self.current_pcmd["roll"] = 0
+        self._send_pcmds()
 
     def on_R3_press(self):
-        """R3 joystick is clicked. This event is only detected when connecting without ds4drv"""
         print("on_R3_press")
 
     def on_R3_release(self):
-        """R3 joystick is released after the click. This event is only detected when connecting without ds4drv"""
         print("on_R3_release")
 
     def on_options_press(self):
@@ -169,17 +201,13 @@ class MyController(Controller):
         print("on_options_release")
 
     def on_share_press(self):
-        """this event is only detected when connecting without ds4drv"""
         print("on_share_press")
 
     def on_share_release(self):
-        """this event is only detected when connecting without ds4drv"""
         print("on_share_release")
 
     def on_playstation_button_press(self):
-        """this event is only detected when connecting without ds4drv"""
         print("on_playstation_button_press")
 
     def on_playstation_button_release(self):
-        """this event is only detected when connecting without ds4drv"""
         print("on_playstation_button_release")

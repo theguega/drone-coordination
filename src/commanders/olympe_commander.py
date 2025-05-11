@@ -2,7 +2,7 @@ import asyncio
 from typing import Tuple
 
 import olympe
-from olympe.messages.ardrone3.Piloting import Landing, UserTakeOff, moveTo
+from olympe.messages.ardrone3.Piloting import PCMD, Landing, TakeOff, UserTakeOff, moveTo
 from olympe.messages.ardrone3.PilotingState import PositionChanged
 
 MAX_RETRY = 1
@@ -16,6 +16,8 @@ class OlympeCommander(BaseCommander):
     def __init__(self, address: str):
         super().__init__(address)
         self.drone = olympe.Drone(self.address)
+
+        self.in_the_air = False
 
     async def connect(self) -> None:
         for attempt in range(1, MAX_RETRY + 1):
@@ -44,18 +46,35 @@ class OlympeCommander(BaseCommander):
         self.drone(moveTo(latitude, longitude, altitude, 0.0)).wait().success()
 
     async def land(self) -> None:
-        self.drone(Landing()).wait().success()
+        if not self.in_the_air:
+            print("[Olympe] Not in the air")
+            return
+        try:
+            assert self.drone(Landing()).wait().success()
+            self.in_the_air = False
+        except Exception:
+            print("[Olympe] Landing failed")
 
     async def takeoff(self) -> None:
-        self.drone(Takeoff()).wait().success()
+        if self.in_the_air:
+            print("[Olympe] Already in the air")
+            return
+        try:
+            assert self.drone(TakeOff()).wait().success()
+            self.in_the_air = True
+        except Exception:
+            print("[Olympe] Takeoff failed")
 
     async def prepare_for_drop(self) -> None:
-        self.drone(UserTakeOff()).wait().success()
+        try:
+            assert self.drone(UserTakeOff()).wait().success()
+        except Exception:
+            print("[Olympe] Prepare for drop failed")
 
     async def set_camera_angle(self, angle: float) -> None:
         raise NotImplementedError("set_camera_angle not implemented for OlympeCommander")
 
-    async def set_pcmds(self, roll: float, pitch: float, yaw: float, gaz: float) -> None:
+    async def set_pcmds(self, roll: float | None, pitch: float | None, yaw: float | None, gaz: float | None) -> None:
         """
         Input :
         roll : float
@@ -79,10 +98,10 @@ class OlympeCommander(BaseCommander):
 
         gaz (i8) – Throttle as signed percentage. On copters: Expressed as signed percentage of the max vertical speed setting, in range [-100, 100] -100 corresponds to a max vertical speed towards ground 100 corresponds to a max vertical speed towards sky This value may be clamped if necessary, in order to respect the maximum supported physical tilt of the copter. During the landing phase, putting some positive gaz will cancel the land. On fixed wings: Expressed as signed percentage of the physical max throttle, in range [-100, 100] Negative value makes the plane fly slower Positive value makes the plane fly faster
         """
-        pass
-        # if roll == 0 and pitch == 0 and yaw == 0 and gaz == 0:
-        #     return
-        # if roll == 0 and pitch == 0:
-        #     self.drone(PCMD(0, 0, 0, yaw, gaz))
-        # else:
-        #     self.drone(PCMD(1, roll, pitch, yaw, gaz))
+        if roll is None or pitch is None or yaw is None or gaz is None:
+            return
+        else:
+            try:
+                assert self.drone(PCMD(1, roll, pitch, yaw, gaz)).wait().success()
+            except Exception:
+                print("[Olympe] PCMD failed")
