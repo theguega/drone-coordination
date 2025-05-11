@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from typing import Tuple
 
 import olympe
@@ -8,6 +9,7 @@ from olympe.messages.ardrone3.PilotingState import PositionChanged
 MAX_RETRY = 1
 
 olympe.log.update_config({"loggers": {"olympe": {"level": "ERROR"}}})
+logger = logging.getLogger()
 
 from .base_commander import BaseCommander
 
@@ -21,19 +23,19 @@ class OlympeCommander(BaseCommander):
 
     async def connect(self) -> None:
         for attempt in range(1, MAX_RETRY + 1):
-            print(f"[Olympe] Attempting to connect to {self.address} (Attempt {attempt}/{MAX_RETRY})")
+            logger.debug(f"[Olympe] Attempting to connect to {self.address} (Attempt {attempt}/{MAX_RETRY})")
             if self.drone.connect():
-                print(f"[Olympe] Connected to {self.address}")
+                logger.debug(f"[Olympe] Connected to {self.address}")
                 return
             else:
-                print(f"[Olympe] Connection attempt {attempt} failed.")
+                logger.debug(f"[Olympe] Connection attempt {attempt} failed.")
                 await asyncio.sleep(2)
 
         raise TimeoutError(f"[OLympe] Failed to connect to {self.address} after {MAX_RETRY} attempts.")
 
     async def disconnect(self) -> None:
         self.drone.disconnect()
-        print(f"[Olympe] Disconnected from {self.address}")
+        logger.debug(f"[Olympe] Disconnected from {self.address}")
 
     async def get_position(self) -> Tuple[float, float, float]:
         state = self.drone.get_state(PositionChanged)
@@ -47,29 +49,29 @@ class OlympeCommander(BaseCommander):
 
     async def land(self) -> None:
         if not self.in_the_air:
-            print("[Olympe] Not in the air")
+            logger.warning("[Olympe] Not in the air")
             return
         try:
             assert self.drone(Landing()).wait().success()
             self.in_the_air = False
         except Exception:
-            print("[Olympe] Landing failed")
+            logger.error("[Olympe] Landing failed")
 
     async def takeoff(self) -> None:
         if self.in_the_air:
-            print("[Olympe] Already in the air")
+            logger.warning("[Olympe] Already in the air")
             return
         try:
             assert self.drone(TakeOff()).wait().success()
             self.in_the_air = True
         except Exception:
-            print("[Olympe] Takeoff failed")
+            logger.error("[Olympe] Takeoff failed")
 
     async def prepare_for_drop(self) -> None:
         try:
             assert self.drone(UserTakeOff()).wait().success()
         except Exception:
-            print("[Olympe] Prepare for drop failed")
+            logger.error("[Olympe] Prepare for drop failed")
 
     async def set_camera_angle(self, angle: float) -> None:
         raise NotImplementedError("set_camera_angle not implemented for OlympeCommander")
@@ -104,4 +106,4 @@ class OlympeCommander(BaseCommander):
             try:
                 assert self.drone(PCMD(1, roll, pitch, yaw, gaz)).wait().success()
             except Exception:
-                print("[Olympe] PCMD failed")
+                logger.error("[Olympe] PCMD failed")

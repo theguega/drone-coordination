@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import logging
 import signal
 import traceback
 
@@ -7,39 +8,41 @@ from commanders.mavsdk_commander import MAVSDKCommander
 from commanders.olympe_commander import OlympeCommander
 from utils import follow_loop, manual_control
 
+logger = logging.getLogger()
+
 
 async def show_help():
-    print("Help: Use the following commands:")
-    print("/takeoff_follower - Follower drone takeoff")
-    print("/follow - Start following logic")
-    print("/prepare_for_release - Prepare follower to be dropped from the leader drone")
-    print("/manual - Control follower drone with RC")
-    print("/help - Show this help message")
-    print("/exit - Exit")
-    print("Ctrl-C to exit")
+    logger.info("Help: Use the following commands:")
+    logger.info("/takeoff_follower - Follower drone takeoff")
+    logger.info("/follow - Start following logic")
+    logger.info("/prepare_for_release - Prepare follower to be dropped from the leader drone")
+    logger.info("/manual - Control follower drone with RC")
+    logger.info("/help - Show this help message")
+    logger.info("/exit - Exit")
+    logger.info("Ctrl-C to exit")
 
 
 async def handle_command(command, leader, follower):
     """Match the command and call the appropriate function."""
     match command:
         case "/takeoff_follower":
-            print("takeoff_follower")
+            logger.debug("takeoff_follower")
         case "/follow":
-            print("Starting follow loop...")
+            logger.info("Starting follow loop...")
             await follow_loop(leader, follower)
         case "/prepare_for_release":
-            print(("Preparing follower to be bropped from the leader drone..."))
+            logger.debug(("Preparing follower to be bropped from the leader drone..."))
             await follower.prepare_for_release()
         case "/manual":
-            print("Starting manual control loop...")
+            logger.debug("Starting manual control loop...")
             await manual_control(follower)
         case "/exit":
-            print("Exiting...")
+            logger.warning("Exiting...")
             raise KeyboardInterrupt()
         case "/help":
             await show_help()
         case _:
-            print(f"Unknown command: {command}")
+            logger.error(f"Unknown command: {command}")
 
 
 async def listen_for_commands(leader, follower):
@@ -58,17 +61,17 @@ async def listen_for_commands(leader, follower):
             command = input("Enter command (/help for list of commands): ")
             await handle_command(command, leader, follower)
     except KeyboardInterrupt:
-        print("\nCtrl-C detected. Exiting gracefully...")
+        logger.warning("\nCtrl-C detected. Exiting gracefully...")
         return
     except Exception as e:
-        print(f"\nError in command processing: {e}")
+        logger.error(f"\nError in command processing: {e}")
         traceback.print_exc()
         return
 
 
 async def cleanup(leader, follower):
     """Clean up resources and disconnect from drones."""
-    print("Cleaning up resources...")
+    logger.info("Cleaning up resources...")
     tasks = []
 
     if follower:
@@ -116,10 +119,10 @@ async def run():
 
     if args.mavsdk_drone:
         leader = MAVSDKCommander(args.mavsdk_drone)
-        print("Using MAVSDK commander as leader with address", args.mavsdk_drone)
+        logger.debug("Using MAVSDK commander as leader with address", args.mavsdk_drone)
     if args.olympe_drone:
         follower = OlympeCommander(args.olympe_drone)
-        print("Using Olympe commander as follower with address", args.olympe_drone)
+        logger.debug("Using Olympe commander as follower with address", args.olympe_drone)
     else:
         raise ValueError("No drone specified")
 
@@ -140,7 +143,7 @@ async def run():
 
 def signal_handler(sig, frame):
     """Handle external signals like SIGTERM."""
-    print(f"\nReceived signal {sig}. Exiting gracefully...")
+    logger.warning(f"\nReceived signal {sig}. Exiting gracefully...")
     # This will raise a KeyboardInterrupt in the main thread
     raise KeyboardInterrupt()
 
@@ -153,7 +156,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(run())
     except KeyboardInterrupt:
-        print("Program terminated by user.")
+        logger.warning("Program terminated by user.")
     except Exception as e:
-        print(f"Unhandled exception: {e}")
+        logger.error(f"Unhandled exception: {e}")
         traceback.print_exc()

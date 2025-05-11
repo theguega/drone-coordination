@@ -15,7 +15,7 @@ DEFAULT_RETRY_DELAY = 0.5  # Delay before retrying after communication failure
 DEFAULT_TIMEOUT = 2.0  # Timeout for position requests
 
 # Set up logging
-logger = logging.getLogger("drone_follow")
+logger = logging.getLogger()
 
 
 class PositionData:

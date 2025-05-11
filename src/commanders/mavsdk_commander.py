@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from typing import Tuple
 
 from mavsdk import System
@@ -10,6 +11,8 @@ CONNECTION_TIMEOUT = 10  # seconds
 JOYSTICK_DEADZONE = 0.1
 UPDATE_RATE = 0.05  # seconds (20 Hz)
 MAX_VELOCITY = 5.0  # m/s
+
+logger = logging.getLogger()
 
 
 class MAVSDKCommander(BaseCommander):
@@ -23,30 +26,28 @@ class MAVSDKCommander(BaseCommander):
         Returns:
             bool: True if connection successful, False otherwise
         """
-        print(f"Attempting to connect to drone at {self.connection_string}")
+        logger.debug(f"Attempting to connect to drone at {self.connection_string}")
 
         for attempt in range(1, MAX_CONNECTION_ATTEMPTS + 1):
             try:
-                print(f"Connection attempt {attempt}/{MAX_CONNECTION_ATTEMPTS}")
+                logger.debug(f"Connection attempt {attempt}/{MAX_CONNECTION_ATTEMPTS}")
                 await self.drone.connect(system_address=self.connection_string)
 
                 # Wait for connection with timeout
                 connection_task = asyncio.create_task(self.wait_for_connection())
                 try:
                     await asyncio.wait_for(connection_task, timeout=CONNECTION_TIMEOUT)
-                    print("Successfully connected to the drone!")
+                    logger.debug("Successfully connected to the drone!")
                     return True
                 except asyncio.TimeoutError:
-                    print(
-                        f"Connection attempt {attempt} timed out after {CONNECTION_TIMEOUT} seconds"
-                    )
+                    logger.warning(f"Connection attempt {attempt} timed out after {CONNECTION_TIMEOUT} seconds")
                     continue
 
             except Exception as e:
-                print(f"Connection attempt {attempt} failed: {e}")
+                logger.error(f"Connection attempt {attempt} failed: {e}")
                 await asyncio.sleep(1)
 
-        print(f"Failed to connect after {MAX_CONNECTION_ATTEMPTS} attempts")
+        logger.error(f"Failed to connect after {MAX_CONNECTION_ATTEMPTS} attempts")
 
     async def disconnect(self) -> None:
         raise NotImplementedError("not implemented for MAVSDKCommander")
@@ -60,9 +61,7 @@ class MAVSDKCommander(BaseCommander):
             break
         return (lat, lon, alt)
 
-    async def goto_position(
-        self, latitude: float, longitude: float, altitude: float
-    ) -> None:
+    async def goto_position(self, latitude: float, longitude: float, altitude: float) -> None:
         raise NotImplementedError("not implemented for MAVSDKCommander")
 
     async def land(self) -> None:
@@ -77,7 +76,5 @@ class MAVSDKCommander(BaseCommander):
     async def set_camera_angle(self, angle: float) -> None:
         raise NotImplementedError("not implemented for MAVSDKCommander")
 
-    async def set_pcmds(
-        self, roll: float, pitch: float, yaw: float, gaz: float
-    ) -> None:
+    async def set_pcmds(self, roll: float, pitch: float, yaw: float, gaz: float) -> None:
         raise NotImplementedError("not implemented for MAVSDKCommander")
