@@ -10,4 +10,5 @@ dependencies = [
     "parrot-olympe==7.7.5",
     "geographiclib>=2.0",
     "mavsdk==2.8.4",
+    "MAVProxy"
 ]

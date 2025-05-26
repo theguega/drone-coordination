@@ -37,7 +37,7 @@ class MyController(Controller):
     def __init__(self, drone: OlympeCommander, **kwargs):
         Controller.__init__(self, **kwargs)
         self.commander = drone
-        self.current_pcmd = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0, "gaz": 0.0}
+        self.current_pcmd = {"roll": 0, "pitch": 0, "yaw": 0, "gaz": 0}
 
     def _send_pcmds(self):
         asyncio.run_coroutine_threadsafe(self.commander.set_pcmds(self.current_pcmd.get("roll"), self.current_pcmd.get("pitch"), self.current_pcmd.get("yaw"), self.current_pcmd.get("gaz")), background_loop)
@@ -63,7 +63,7 @@ class MyController(Controller):
         pass
 
     def on_square_press(self):
-        print("on_square_press")
+        asyncio.run_coroutine_threadsafe(self.commander.prepare_for_drop(), background_loop)
 
     def on_square_release(self):
         print("on_square_release")
@@ -75,7 +75,8 @@ class MyController(Controller):
         print("on_L1_release")
 
     def on_L2_press(self, value):
-        print("on_L2_press: {}".format(value))
+        # print("on_L2_press: {}".format(value))
+        pass
 
     def on_L2_release(self):
         print("on_L2_release")
@@ -87,7 +88,8 @@ class MyController(Controller):
         print("on_R1_release")
 
     def on_R2_press(self, value):
-        print("on_R2_press: {}".format(value))
+        # print("on_R2_press: {}".format(value))
+        pass
 
     def on_R2_release(self):
         print("on_R2_release")
@@ -114,28 +116,28 @@ class MyController(Controller):
     def on_L3_up(self, value):
         value = -(value / JOYSTICK_SATURATION) * 100
         if abs(self.current_pcmd["gaz"] - value) > UPDATE_DEADZONE or value == 0:
-            self.current_pcmd["gaz"] = value
+            self.current_pcmd["gaz"] = int(value)
             self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_L3_down(self, value):
         value = -(value / JOYSTICK_SATURATION) * 100
         if abs(self.current_pcmd["gaz"] - value) > UPDATE_DEADZONE or value == 0:
-            self.current_pcmd["gaz"] = value
+            self.current_pcmd["gaz"] = int(value)
             self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_L3_left(self, value):
         value = (value / JOYSTICK_SATURATION) * 100
         if abs(self.current_pcmd["yaw"] - value) > UPDATE_DEADZONE or value == 0:
-            self.current_pcmd["yaw"] = value
+            self.current_pcmd["yaw"] = int(value)
             self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_L3_right(self, value):
         value = (value / JOYSTICK_SATURATION) * 100
         if abs(self.current_pcmd["yaw"] - value) > UPDATE_DEADZONE or value == 0:
-            self.current_pcmd["yaw"] = value
+            self.current_pcmd["yaw"] = int(value)
             self._send_pcmds()
 
     def on_L3_y_at_rest(self):
@@ -156,28 +158,28 @@ class MyController(Controller):
     def on_R3_up(self, value):
         value = -(value / JOYSTICK_SATURATION) * 100
         if abs(self.current_pcmd["pitch"] - value) > UPDATE_DEADZONE or value == 0:
-            self.current_pcmd["pitch"] = value
+            self.current_pcmd["pitch"] = int(value)
             self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_R3_down(self, value):
         value = -(value / JOYSTICK_SATURATION) * 100
         if abs(self.current_pcmd["pitch"] - value) > UPDATE_DEADZONE or value == 0:
-            self.current_pcmd["pitch"] = value
+            self.current_pcmd["pitch"] = int(value)
             self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_R3_left(self, value):
         value = (value / JOYSTICK_SATURATION) * 100
         if abs(self.current_pcmd["roll"] - value) > UPDATE_DEADZONE or value == 0:
-            self.current_pcmd["roll"] = value
+            self.current_pcmd["roll"] = int(value)
             self._send_pcmds()
 
     @apply_joystick_deadzone
     def on_R3_right(self, value):
         value = (value / JOYSTICK_SATURATION) * 100
         if abs(self.current_pcmd["roll"] - value) > UPDATE_DEADZONE or value == 0:
-            self.current_pcmd["roll"] = value
+            self.current_pcmd["roll"] = int(value)
             self._send_pcmds()
 
     def on_R3_y_at_rest(self):

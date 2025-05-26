@@ -1,0 +1,217 @@
+2025-05-26 15:18:08 DEBUG    Using selector: EpollSelector
+2025-05-26 15:18:08 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:18:08 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:18:08 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:18:14 ERROR    '192.168.42.1' connection timed out
+2025-05-26 15:18:14 DEBUG    [Olympe] Connection attempt 1 failed.
+2025-05-26 15:18:16 ERROR    '192.168.42.1 connection retries failed
+2025-05-26 15:18:16 ERROR    Error connecting to drones: [OLympe] Failed to connect to 192.168.42.1 after 1 attempts.
+2025-05-26 15:18:16 INFO     Cleaning up resources...
+2025-05-26 15:18:16 DEBUG    Cleanup completed.
+2025-05-26 15:18:20 DEBUG    Using selector: EpollSelector
+2025-05-26 15:18:20 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:18:20 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:18:20 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:18:26 ERROR    '192.168.42.1' connection timed out
+2025-05-26 15:18:26 DEBUG    [Olympe] Connection attempt 1 failed.
+2025-05-26 15:18:28 ERROR    '192.168.42.1 connection retries failed
+2025-05-26 15:18:28 ERROR    Error connecting to drones: [OLympe] Failed to connect to 192.168.42.1 after 1 attempts.
+2025-05-26 15:18:28 INFO     Cleaning up resources...
+2025-05-26 15:18:28 DEBUG    Cleanup completed.
+2025-05-26 15:30:06 DEBUG    Using selector: EpollSelector
+2025-05-26 15:30:06 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:30:06 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:30:06 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:30:07 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:30:28 DEBUG    Preparing follower to be dropped from the leader drone...
+2025-05-26 15:30:28 ERROR    [Olympe] Prepare for drop failed
+2025-05-26 15:30:43 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:30:43 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:30:43 INFO     Cleaning up resources...
+2025-05-26 15:30:43 DEBUG    Cleanup completed.
+2025-05-26 15:32:00 DEBUG    Using selector: EpollSelector
+2025-05-26 15:32:00 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:32:00 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:32:00 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:32:00 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:32:15 DEBUG    Preparing follower to be dropped from the leader drone...
+2025-05-26 15:32:15 ERROR    [Olympe] Prepare for drop failed
+2025-05-26 15:32:17 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:32:17 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:32:17 INFO     Cleaning up resources...
+2025-05-26 15:32:17 DEBUG    Cleanup completed.
+2025-05-26 15:32:38 DEBUG    Using selector: EpollSelector
+2025-05-26 15:32:38 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:32:38 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:32:38 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:32:39 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:32:45 DEBUG    Preparing follower to be dropped from the leader drone...
+2025-05-26 15:32:45 ERROR    [Olympe] Prepare for drop failed UserTakeOff() missing 1 required positional argument: 'state'
+2025-05-26 15:32:48 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:32:48 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:32:48 INFO     Cleaning up resources...
+2025-05-26 15:32:48 DEBUG    Cleanup completed.
+2025-05-26 15:33:40 DEBUG    Using selector: EpollSelector
+2025-05-26 15:33:40 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:33:40 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:33:40 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:33:40 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:33:50 DEBUG    Preparing follower to be dropped from the leader drone...
+2025-05-26 15:34:01 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:34:01 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:34:01 INFO     Cleaning up resources...
+2025-05-26 15:34:01 DEBUG    Cleanup completed.
+2025-05-26 15:34:05 DEBUG    Using selector: EpollSelector
+2025-05-26 15:34:05 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:34:05 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:34:05 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:34:06 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:34:08 DEBUG    Starting manual control loop...
+2025-05-26 15:34:17 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:34:20 ERROR    [Olympe] Takeoff failed
+2025-05-26 15:34:24 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:34:24 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:34:24 INFO     Cleaning up resources...
+2025-05-26 15:34:24 DEBUG    Cleanup completed.
+2025-05-26 15:34:24 ERROR    [Olympe] Takeoff failed
+2025-05-26 15:36:16 DEBUG    Using selector: EpollSelector
+2025-05-26 15:36:16 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:36:16 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:36:16 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:36:17 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:36:18 DEBUG    Starting manual control loop...
+2025-05-26 15:36:23 INFO     [Olympe] Takeoff successful
+2025-05-26 15:36:34 INFO     [Olympe] Landing successful
+2025-05-26 15:36:41 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:37:15 DEBUG    Preparing follower to be dropped from the leader drone...
+2025-05-26 15:37:15 ERROR    [Olympe] Prepare for drop failed 'function' object has no attribute 'success'
+2025-05-26 15:37:31 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:37:31 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:37:31 INFO     Cleaning up resources...
+2025-05-26 15:37:31 DEBUG    Cleanup completed.
+2025-05-26 15:37:36 DEBUG    Using selector: EpollSelector
+2025-05-26 15:37:36 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:37:36 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:37:36 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:37:37 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:37:39 DEBUG    Starting manual control loop...
+2025-05-26 15:37:41 INFO     [Olympe] Takeoff successful
+2025-05-26 15:37:46 INFO     [Olympe] Landing successful
+2025-05-26 15:37:53 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:37:54 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:37:54 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:37:54 INFO     Cleaning up resources...
+2025-05-26 15:37:54 DEBUG    Cleanup completed.
+2025-05-26 15:40:44 DEBUG    Using selector: EpollSelector
+2025-05-26 15:40:44 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:40:44 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:40:44 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:40:45 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:40:51 DEBUG    Preparing follower to be dropped from the leader drone...
+2025-05-26 15:40:51 ERROR    [Olympe] Prepare for drop failed UserTakeOff() missing 1 required positional argument: 'state'
+2025-05-26 15:40:56 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:40:56 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:40:56 INFO     Cleaning up resources...
+2025-05-26 15:40:56 DEBUG    Cleanup completed.
+2025-05-26 15:41:05 DEBUG    Using selector: EpollSelector
+2025-05-26 15:41:05 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:41:05 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:41:05 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:41:06 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:41:09 DEBUG    Preparing follower to be dropped from the leader drone...
+2025-05-26 15:41:09 ERROR    [Olympe] Prepare for drop failed UserTakeOff() missing 1 required positional argument: 'state'
+2025-05-26 15:41:12 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:41:12 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:41:12 INFO     Cleaning up resources...
+2025-05-26 15:41:12 DEBUG    Cleanup completed.
+2025-05-26 15:41:24 DEBUG    Using selector: EpollSelector
+2025-05-26 15:41:24 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:41:24 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:41:24 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/1)
+2025-05-26 15:41:25 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:41:31 DEBUG    Preparing follower to be dropped from the leader drone...
+2025-05-26 15:41:40 DEBUG    Starting manual control loop...
+2025-05-26 15:41:42 INFO     [Olympe] Takeoff successful
+2025-05-26 15:41:46 INFO     [Olympe] Landing successful
+2025-05-26 15:41:58 INFO     [Olympe] Takeoff successful
+2025-05-26 15:42:03 INFO     [Olympe] Landing successful
+2025-05-26 15:42:09 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:42:16 DEBUG    Starting manual control loop...
+2025-05-26 15:42:22 INFO     [Olympe] Takeoff successful
+2025-05-26 15:42:30 INFO     [Olympe] Landing successful
+2025-05-26 15:42:44 ERROR    [Olympe] Takeoff failed
+2025-05-26 15:42:52 INFO     [Olympe] Takeoff successful
+2025-05-26 15:42:55 INFO     [Olympe] Landing successful
+2025-05-26 15:43:30 INFO     [Olympe] Landing successful
+2025-05-26 15:43:44 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:43:45 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:43:45 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:43:45 INFO     Cleaning up resources...
+2025-05-26 15:43:45 DEBUG    Cleanup completed.
+2025-05-26 15:53:29 DEBUG    Using selector: EpollSelector
+2025-05-26 15:53:29 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:53:29 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:53:29 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/3)
+2025-05-26 15:53:35 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:53:35 WARNING  Program terminated by user.
+2025-05-26 15:53:56 DEBUG    Using selector: EpollSelector
+2025-05-26 15:53:56 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:53:56 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:53:56 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/3)
+2025-05-26 15:53:57 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:53:59 DEBUG    Starting manual control loop...
+2025-05-26 15:54:15 ERROR    [Olympe] Prepare for drop failed UserTakeOff() missing 1 required positional argument: 'state'
+2025-05-26 15:54:17 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:54:18 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:54:18 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:54:18 INFO     Cleaning up resources...
+2025-05-26 15:54:18 DEBUG    Cleanup completed.
+2025-05-26 15:54:26 DEBUG    Using selector: EpollSelector
+2025-05-26 15:54:26 DEBUG    Using MAVSDK commander as leader with address udp://:14540
+2025-05-26 15:54:26 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-05-26 15:54:26 DEBUG    [Olympe] Attempting to connect to 192.168.42.1 (Attempt 1/3)
+2025-05-26 15:54:26 DEBUG    [Olympe] Connected to 192.168.42.1
+2025-05-26 15:54:28 DEBUG    Starting manual control loop...
+2025-05-26 15:54:37 INFO     [Olympe] Drone has been released
+2025-05-26 15:55:02 INFO     [Olympe] Landing successful
+2025-05-26 15:55:38 INFO     [Olympe] Drone has been released
+2025-05-26 15:56:17 INFO     [Olympe] Landing successful
+2025-05-26 15:56:23 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:56:32 ERROR    read(fd=45) err=110(Connection timed out)
+2025-05-26 15:56:33 ERROR    read(fd=50) err=110(Connection timed out)
+2025-05-26 15:56:33 WARNING  
+Received signal 2. Exiting gracefully...
+2025-05-26 15:56:33 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-05-26 15:56:33 INFO     Cleaning up resources...
+2025-05-26 15:56:33 DEBUG    Cleanup completed.

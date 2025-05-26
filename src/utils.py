@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 
 from geographiclib.geodesic import Geodesic
 
-from .controller import MyController
+from controller import MyController
 
 # Configuration constants with default values
 DEFAULT_FOLLOW_DIST_M = 5.0  # Target follow distance in meters
@@ -200,5 +200,5 @@ async def manual_control(follower) -> None:
         logger.warning("Manual control loop interrupted – stopping both drones by sending pcmds")
         await follower.set_pcmds(0, 0, 0, 0)
     except Exception as e:
-        print(f"Error in manual control loop: {e}")
+        logger.error(f"Error in manual control loop: {e}")
         await follower.set_pcmds(0, 0, 0, 0)

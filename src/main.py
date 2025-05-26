@@ -8,18 +8,50 @@ from commanders.mavsdk_commander import MAVSDKCommander
 from commanders.olympe_commander import OlympeCommander
 from utils import follow_loop, manual_control
 
+# Define terminal color codes
+TERMINAL_COLORS_CODE = {
+    "DEBUG": "\033[1;34m",
+    "INFO": "\033[1;32m",
+    "WARNING": "\033[1;33m",
+    "ERROR": "\033[1;31m",
+    "RESET": "\033[0m",
+}
+
+
+class ColoredFormatter(logging.Formatter):
+    def format(self, record):
+        log_message = super().format(record)
+        log_level = record.levelname
+        color_code = TERMINAL_COLORS_CODE.get(log_level, TERMINAL_COLORS_CODE["RESET"])
+        return f"{color_code}{log_message}{TERMINAL_COLORS_CODE['RESET']}"
+
+
+# Configure the logger
 logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+# Create a handler for stderr
+stderr_handler = logging.StreamHandler()
+stderr_handler.setFormatter(ColoredFormatter("%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+
+# Create a handler for the file
+file_handler = logging.FileHandler("drone-coordination.log")
+file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+
+# Add both handlers to the logger
+logger.addHandler(stderr_handler)
+logger.addHandler(file_handler)
 
 
 async def show_help():
-    logger.info("Help: Use the following commands:")
-    logger.info("/takeoff_follower - Follower drone takeoff")
-    logger.info("/follow - Start following logic")
-    logger.info("/prepare_for_release - Prepare follower to be dropped from the leader drone")
-    logger.info("/manual - Control follower drone with RC")
-    logger.info("/help - Show this help message")
-    logger.info("/exit - Exit")
-    logger.info("Ctrl-C to exit")
+    print("Help: Use the following commands:")
+    print("/takeoff_follower - Follower drone takeoff")
+    print("/follow - Start following logic")
+    print("/prepare_for_drop - Prepare follower to be dropped from the leader drone")
+    print("/manual - Control follower drone with RC")
+    print("/help - Show this help message")
+    print("/exit - Exit")
+    print("Ctrl-C to exit")
 
 
 async def handle_command(command, leader, follower):
@@ -30,9 +62,9 @@ async def handle_command(command, leader, follower):
         case "/follow":
             logger.info("Starting follow loop...")
             await follow_loop(leader, follower)
-        case "/prepare_for_release":
-            logger.debug(("Preparing follower to be bropped from the leader drone..."))
-            await follower.prepare_for_release()
+        case "/prepare_for_drop":
+            logger.debug(("Preparing follower to be dropped from the leader drone..."))
+            await follower.prepare_for_drop()
         case "/manual":
             logger.debug("Starting manual control loop...")
             await manual_control(follower)
@@ -79,7 +111,7 @@ async def cleanup(leader, follower):
 
     if tasks:
         await asyncio.gather(*tasks, return_exceptions=True)
-    print("Cleanup completed.")
+    logger.debug("Cleanup completed.")
 
 
 # Main entry point
@@ -119,21 +151,21 @@ async def run():
 
     if args.mavsdk_drone:
         leader = MAVSDKCommander(args.mavsdk_drone)
-        logger.debug("Using MAVSDK commander as leader with address", args.mavsdk_drone)
+        logger.debug(f"Using MAVSDK commander as leader with address {args.mavsdk_drone}")
     if args.olympe_drone:
         follower = OlympeCommander(args.olympe_drone)
-        logger.debug("Using Olympe commander as follower with address", args.olympe_drone)
+        logger.debug(f"Using Olympe commander as follower with address {args.olympe_drone}")
     else:
         raise ValueError("No drone specified")
 
-    # if leader and follower:
-    #     try:
-    #         task = asyncio.gather(leader.connect(), follower.connect())
-    #         await task
-    #     except Exception as e:
-    #         print(f"Error connecting to drones: {e}")
-    #         await cleanup(leader, follower)
-    #         return
+    if leader and follower:
+        try:
+            task = asyncio.gather(follower.connect())
+            await task
+        except Exception as e:
+            logger.error(f"Error connecting to drones: {e}")
+            await cleanup(leader, follower)
+            return
 
     try:
         await listen_for_commands(leader, follower)

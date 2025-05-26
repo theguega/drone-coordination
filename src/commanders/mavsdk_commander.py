@@ -76,5 +76,5 @@ class MAVSDKCommander(BaseCommander):
     async def set_camera_angle(self, angle: float) -> None:
         raise NotImplementedError("not implemented for MAVSDKCommander")
 
-    async def set_pcmds(self, roll: float, pitch: float, yaw: float, gaz: float) -> None:
+    async def set_pcmds(self, roll: int, pitch: int, yaw: int, gaz: int) -> None:
         raise NotImplementedError("not implemented for MAVSDKCommander")
