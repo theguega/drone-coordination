@@ -192,6 +192,10 @@ async def manual_control(follower) -> None:
     """Continuously read PS4 controller commands and send them to the drone."""
     try:
         controller = MyController(drone=follower, interface="/dev/input/js1", connecting_using_ds4drv=False)
+        print("Manual control loop started")
+        print("SQUARE -> Engage dropping procedure")
+        print("CIRCLE -> Landing")
+        print("CROSS -> Takeoff")
         controller.listen()
     except asyncio.CancelledError:
         logger.warning("Manual control loop cancelled – stopping both drones by sending pcmds")

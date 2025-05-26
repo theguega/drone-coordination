@@ -3,7 +3,7 @@ import logging
 from typing import Tuple
 
 import olympe
-from olympe.messages.ardrone3.Piloting import PCMD, Landing, TakeOff, UserTakeOff, moveTo
+from olympe.messages.ardrone3.Piloting import PCMD, Emergency, Landing, TakeOff, UserTakeOff, moveTo
 from olympe.messages.ardrone3.PilotingState import FlyingStateChanged, PositionChanged
 
 MAX_RETRY = 3
@@ -65,9 +65,13 @@ class OlympeCommander(BaseCommander):
 
     async def prepare_for_drop(self) -> None:
         try:
-            assert self.drone(UserTakeOff(1) >> FlyingStateChanged(state="hovering", _timeout=20)).wait().success()
-            logger.info("[Olympe] Drone has been released")
-            self.in_the_air = True
+            dropping_procedure = self.drone(UserTakeOff(1) >> FlyingStateChanged(state="hovering", _timeout=10)).wait()
+            if dropping_procedure.success():
+                logger.info("[Olympe] Drone has been released")
+                self.in_the_air = True
+            else:
+                logger.error("[Olympe] Dropping procedure timed out, canceling it")
+                self.drone(UserTakeOff(0)).wait().success()
         except Exception as e:
             logger.error(f"[Olympe] Prepare for drop failed {e}")
 
@@ -108,3 +112,11 @@ class OlympeCommander(BaseCommander):
                 assert self.drone(PCMD(1, roll, pitch, yaw, gaz, 0)).wait().success()
             except Exception as e:
                 logger.error(f"[Olympe] PCMD failed {e}")
+
+    async def emergency(self) -> None:
+        """
+        /! DO NOT CALL THIS FUNCTION IF YOU ARE NOT SURE OF WHAT YOU ARE DOING /!
+
+        Cut out the motors. This cuts immediatly the motors. The drone will fall. This command is sent on a dedicated high priority buffer which will infinitely retry to send it if the command is not delivered.
+        """
+        self.drone(Emergency())

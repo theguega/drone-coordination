@@ -79,7 +79,8 @@ class MyController(Controller):
         pass
 
     def on_L2_release(self):
-        print("on_L2_release")
+        # print("on_L2_release")
+        pass
 
     def on_R1_press(self):
         print("on_R1_press")
@@ -92,7 +93,8 @@ class MyController(Controller):
         pass
 
     def on_R2_release(self):
-        print("on_R2_release")
+        # print("on_R2_release")
+        pass
 
     def on_up_arrow_press(self):
         print("on_up_arrow_press")
