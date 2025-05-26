@@ -121,9 +121,9 @@ async def run():
     # Require that --mavsdk_drone is used, even if the address is not specified
     parser.add_argument(
         "--mavsdk_drone",
-        help="MAVSDK connection string (default: udp://:14540)",
+        help="MAVSDK connection string (default: udp://:14550)",
         nargs="?",
-        const="udp://:14540",
+        const="udp://:14550",
         default=None,
     )
 
@@ -132,7 +132,7 @@ async def run():
         "--olympe_drone",
         help="Parrot Olympe IP (optional)",
         nargs="?",
-        const="10.202.0.1",
+        const="192.168.42.1",
         default=None,
     )
 

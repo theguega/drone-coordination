@@ -16,13 +16,14 @@ source .venv/bin/activate
 uv pip install -e .
 ```
 
-## 🛠️ Installation for Bebop
+## Forwarding Mavlink
+QGroundControl's MAVLink Forwarding
+QGroundControl has built-in MAVLink forwarding:
 
-1. Build and run docker image that contains ROS dependencies.
-
-```bash
-./setup.sh
-```
+In QGroundControl: Application Settings → General → MAVLink
+Enable "Forward MAVLink"
+Set output to UDP port (e.g., 14550)
+Your Python script connects to udp://127.0.0.1:14550
 
 ## Launching the application
 
