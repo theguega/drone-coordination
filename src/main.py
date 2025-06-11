@@ -123,7 +123,7 @@ async def run():
         "--mavsdk_drone",
         help="MAVSDK connection string (default: udp://:14550)",
         nargs="?",
-        const="udp://:14550",
+        const="udp://:14551",
         default=None,
     )
 
@@ -160,7 +160,7 @@ async def run():
 
     if leader and follower:
         try:
-            task = asyncio.gather(follower.connect())
+            task = asyncio.gather(leader.connect())
             await task
         except Exception as e:
             logger.error(f"Error connecting to drones: {e}")
