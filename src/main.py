@@ -32,11 +32,19 @@ logger.setLevel(logging.DEBUG)
 
 # Create a handler for stderr
 stderr_handler = logging.StreamHandler()
-stderr_handler.setFormatter(ColoredFormatter("%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+stderr_handler.setFormatter(
+    ColoredFormatter(
+        "%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+    )
+)
 
 # Create a handler for the file
 file_handler = logging.FileHandler("drone-coordination.log")
-file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+file_handler.setFormatter(
+    logging.Formatter(
+        "%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+    )
+)
 
 # Add both handlers to the logger
 logger.addHandler(stderr_handler)
@@ -78,16 +86,6 @@ async def handle_command(command, leader, follower):
 
 
 async def listen_for_commands(leader, follower):
-    """Wait for commands asynchronously using signals."""
-    # loop = asyncio.get_event_loop()
-
-    # def on_signal_received(signum, frame):
-    #     """Handles the SIGUSR1 signal and triggers command input."""
-    #     print("Command received. Please enter your command:")
-
-    # # Corrected signal handler: passing `signum` and `frame` parameters
-    # loop.add_signal_handler(signal.SIGUSR1, on_signal_received, signal.SIGUSR1, None)
-
     try:
         while True:
             command = input("Enter command (/help for list of commands): ")
@@ -144,23 +142,29 @@ async def run():
 
     # Enforce at least one of --olympe_drone or --bebop_drone must be provided
     if args.olympe_drone is None and args.bebop_drone is None:
-        parser.error("At least one of --olympe_drone or --bebop_drone must be specified (addresses are optional)")
+        parser.error(
+            "At least one of --olympe_drone or --bebop_drone must be specified (addresses are optional)"
+        )
 
     leader = None
     follower = None
 
     if args.mavsdk_drone:
         leader = MAVSDKCommander(args.mavsdk_drone)
-        logger.debug(f"Using MAVSDK commander as leader with address {args.mavsdk_drone}")
+        logger.debug(
+            f"Using MAVSDK commander as leader with address {args.mavsdk_drone}"
+        )
     if args.olympe_drone:
         follower = OlympeCommander(args.olympe_drone)
-        logger.debug(f"Using Olympe commander as follower with address {args.olympe_drone}")
+        logger.debug(
+            f"Using Olympe commander as follower with address {args.olympe_drone}"
+        )
     else:
         raise ValueError("No drone specified")
 
     if leader and follower:
         try:
-            task = asyncio.gather(leader.connect())
+            task = asyncio.gather(follower.connect())
             await task
         except Exception as e:
             logger.error(f"Error connecting to drones: {e}")

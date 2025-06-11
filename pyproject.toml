@@ -6,8 +6,4 @@ authors = [{ name = "Theo Guegan", email = "theo.guegan@etu.utc.fr" }]
 readme = "README.md"
 requires-python = ">=3.10"
 
-dependencies = [
-    "parrot-olympe==7.7.5",
-    "geographiclib>=2.0",
-    "mavsdk==2.8.4",
-]
+dependencies = ["parrot-olympe==7.7.5", "geographiclib>=2.0", "mavsdk==2.8.4"]

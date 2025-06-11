@@ -159,7 +159,13 @@ class Actions:
 
 
 class Controller(Actions):
-    def __init__(self, interface, connecting_using_ds4drv=True, event_definition=None, event_format=None):
+    def __init__(
+        self,
+        interface,
+        connecting_using_ds4drv=True,
+        event_definition=None,
+        event_format=None,
+    ):
         """
         Initiate controller instance that is capable of listening to all events on specified input interface
         :param interface: STRING aka /dev/input/js0 or any other PS4 Duelshock controller interface.
@@ -223,7 +229,11 @@ class Controller(Actions):
                 on_connect()
 
         def wait_for_interface():
-            print("Waiting for interface: {} to become available . . .".format(self.interface))
+            print(
+                "Waiting for interface: {} to become available . . .".format(
+                    self.interface
+                )
+            )
             for i in range(timeout):
                 if os.path.exists(self.interface):
                     print("Successfully bound to: {}.".format(self.interface))
@@ -242,7 +252,11 @@ class Controller(Actions):
                 exit(1)
 
         def check_for(sub, full, start_index):
-            return [start for start in range(start_index, len(full) - len(sub) + 1) if sub == full[start : start + len(sub)]]
+            return [
+                start
+                for start in range(start_index, len(full) - len(sub) + 1)
+                if sub == full[start : start + len(sub)]
+            ]
 
         def unpack():
             __event = struct.unpack(self.event_format, event)
@@ -258,9 +272,19 @@ class Controller(Actions):
             while not self.stop and event:
                 (overflow, value, button_type, button_id) = unpack()
                 if button_id not in self.black_listed_buttons:
-                    self.__handle_event(button_id=button_id, button_type=button_type, value=value, overflow=overflow, debug=self.debug)
+                    self.__handle_event(
+                        button_id=button_id,
+                        button_type=button_type,
+                        value=value,
+                        overflow=overflow,
+                        debug=self.debug,
+                    )
                 for i, special_input in enumerate(on_sequence):
-                    check = check_for(special_input["inputs"], self.event_history, special_inputs_indexes[i])
+                    check = check_for(
+                        special_input["inputs"],
+                        self.event_history,
+                        special_inputs_indexes[i],
+                    )
                     if len(check) != 0:
                         special_inputs_indexes[i] = check[0] + 1
                         special_input["callback"]()
@@ -269,7 +293,14 @@ class Controller(Actions):
             on_disconnect_callback()
 
     def __handle_event(self, button_id, button_type, value, overflow, debug):
-        event = self.event_definition(button_id=button_id, button_type=button_type, value=value, connecting_using_ds4drv=self.connecting_using_ds4drv, overflow=overflow, debug=debug)
+        event = self.event_definition(
+            button_id=button_id,
+            button_type=button_type,
+            value=value,
+            connecting_using_ds4drv=self.connecting_using_ds4drv,
+            overflow=overflow,
+            debug=debug,
+        )
 
         if event.R3_event():
             self.event_history.append("right_joystick")
