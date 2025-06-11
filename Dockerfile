@@ -17,4 +17,7 @@ RUN uv pip install -e .
 # Expose les ports nécessaires à la communication avec le drone
 EXPOSE 8080 8123 8765 4222 6222 8222
 
-CMD ["/bin/bash"]
+ENV VIRTUAL_ENV=/drone-coordination/.venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+CMD ["python", "src/main.py", "--mavsdk_drone", "--olympe_drone"]

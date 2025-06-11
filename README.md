@@ -1,60 +1,86 @@
-# VTOL and FPV Drone Coordination
+# 🚁 VTOL and FPV Drone Coordination
 
-# 🚀 Automated setup with script
+A sophisticated drone coordination system that enables autonomous following behavior between two drones, with support for both MAVSDK and Parrot Olympe protocols. This project implements a leader-follower architecture where one drone can autonomously follow another, with additional features for manual control and special operations.
+
+## ✨ Features
+
+- 🤖 Autonomous following behavior between drones
+- 🎮 Manual control support via RC
+- 🛩️ Support for both MAVSDK and Parrot Olympe protocols
+- 📊 Comprehensive logging system with colored output
+- 🐳 Docker support for cross-platform compatibility
+- 🔄 Real-time command processing and drone control
+
+## 🛠️ Prerequisites
+
+### For MacOS
+- Docker Desktop
+- Python 3.10 or higher
+
+### For Linux
+- Python 3.10 or higher
+- UV (Python virtual environment manager)
+
+## 🚀 Getting Started
+
+### Using Docker (Recommended for MacOS)
 
 ```bash
-./run.sh # should work on Linux and MacOS
+# Build the Docker container
+./drone-coordination.sh build
+
+# Run the application
+./drone-coordination.sh run
 ```
 
-# 🚀 Getting Started - Ubuntu
-
-## 🔧 Prerequisites
-
-- Ubuntu
-- Docker
-- uv for Python virtualenv
-
-## 🛠️ Installation
+### Direct Installation (Linux)
 
 ```bash
+# Create and activate virtual environment using UV
 uv venv
 source .venv/bin/activate
-uv pip install -e .
+
+# Install dependencies
+pip install -e .
 ```
 
-## Forwarding Mavlink
-QGroundControl's MAVLink Forwarding
-QGroundControl has built-in MAVLink forwarding:
+## 🎯 Usage
 
-In QGroundControl: Application Settings → General → MAVLink
-Enable "Forward MAVLink"
-Set output to UDP port (e.g., 14550)
-Your Python script connects to udp://127.0.0.1:14550
+The application provides several commands for controlling the drones:
 
-Or you can follow isntructions in [proxy.md](proxy.md)
+- `/takeoff_follower` - Initiates takeoff for the follower drone
+- `/follow` - Starts the autonomous following behavior
+- `/prepare_for_drop` - Prepares the follower drone for being dropped from the leader
+- `/manual` - Enables manual control of the follower drone
+- `/help` - Displays available commands
+- `/exit` - Exits the application
 
-## Launching the application
+## 🔧 Configuration
+
+The application supports various connection options:
 
 ```bash
-uv run src/main.py
+# Basic usage with default addresses
+python src/main.py --mavsdk_drone --olympe_drone
+
+# Custom connection addresses
+python src/main.py --mavsdk_drone udp://:14551 --olympe_drone 192.168.42.1
 ```
 
-# 🚀 Getting Started - MacOS - Windows (WSL)
+## 📦 Dependencies
 
-## 🔧 Prerequisites
+- parrot-olympe==7.7.5
+- geographiclib>=2.0
+- mavsdk==2.8.4
 
-- MacOS
-- Docker
+## 📝 Logging
 
-## 🛠️ Installation
+The application maintains detailed logs in `drone-coordination.log` with colored output in the terminal for better visibility of different log levels.
 
-```bash
-docker build -t drone-coordination .
-docker run -it --rm \
-  -p 44444:44444/tcp \
-  -p 44445:44445/tcp \
-  -p 2233:2233/udp \
-  -p 9988:9988/udp \
-  --net=host \
-  drone-coordination
-```
+## 👥 Author
+
+- **Theo Guegan** - [theo.guegan@etu.utc.fr](mailto:theo.guegan@etu.utc.fr)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

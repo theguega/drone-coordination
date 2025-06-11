@@ -26,13 +26,15 @@ COPY pyproject.toml /drone-coordination
 COPY src /drone-coordination/src
 
 # Create and activate virtual environment and install dependencies
-RUN python3 -m venv .venv \
-    && . .venv/bin/activate \
-    && pip install --upgrade pip \
-    && pip install -e .
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN pip install --upgrade pip
+RUN pip install -e .
 
 # Expose ports for drone communication
 EXPOSE 8080 8123 8765 4222 6222 8222
 
 # Start the application
-CMD [".venv/bin/python", "src/main.py", "--mavsdk_drone", "--olympe_drone"]
+CMD ["python", "src/main.py", "--mavsdk_drone", "--olympe_drone"]
