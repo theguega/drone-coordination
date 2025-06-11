@@ -30,6 +30,7 @@ elif [[ "$PLATFORM" == "Darwin" ]]; then
 
   echo "🚀 Launching Docker container..."
   docker run -it --rm \
+    -P \
     --net=host \
     drone-coordination
 

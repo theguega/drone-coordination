@@ -15,12 +15,6 @@ RUN uv venv
 RUN uv pip install -e .
 
 # Expose les ports nécessaires à la communication avec le drone
-EXPOSE 44444/tcp
-EXPOSE 44445/tcp
-EXPOSE 2233/udp
-EXPOSE 14550/udp
-EXPOSE 14551/udp
-EXPOSE 2233/udp
-EXPOSE 9988/udp
+EXPOSE 8080 8123 8765 4222 6222 8222
 
-CMD ["uv", "run", "src/main.py", "--mavsdk_drone", "--olympe_drone"]
+CMD ["/bin/bash"]

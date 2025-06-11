@@ -1,0 +1,38 @@
+FROM ubuntu:22.04
+
+# Avoid prompts during apt operations
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies and Python 3.10+
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    build-essential \
+    git \
+    ffmpeg \
+    libglib2.0-0 libsm6 libxext6 libxrender-dev \
+    net-tools iproute2 iputils-ping \
+    python3.10 python3.10-venv python3.10-dev python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Use Python 3.10 as default
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1 \
+    && update-alternatives --install /usr/bin/python3 python /usr/bin/python3.10 1 \
+    && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+
+WORKDIR /drone-coordination
+
+# Copy project files
+COPY pyproject.toml /drone-coordination
+COPY src /drone-coordination/src
+
+# Create and activate virtual environment and install dependencies
+RUN python3 -m venv .venv \
+    && . .venv/bin/activate \
+    && pip install --upgrade pip \
+    && pip install -e .
+
+# Expose ports for drone communication
+EXPOSE 8080 8123 8765 4222 6222 8222
+
+# Start the application
+CMD [".venv/bin/python", "src/main.py", "--mavsdk_drone", "--olympe_drone"]
