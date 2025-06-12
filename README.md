@@ -14,11 +14,9 @@ A sophisticated drone coordination system that enables autonomous following beha
 ## 🛠️ Prerequisites
 
 ### For MacOS
-- Docker Desktop
-- Python 3.10 or higher
+- Docker
 
 ### For Linux
-- Python 3.10 or higher
 - UV (Python virtual environment manager)
 
 ## 🚀 Getting Started
