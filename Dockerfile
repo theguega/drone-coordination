@@ -20,4 +20,4 @@ EXPOSE 8080 8123 8765 4222 6222 8222
 ENV VIRTUAL_ENV=/drone-coordination/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-CMD ["python", "src/main.py", "--mavsdk_drone", "--olympe_drone"]
+CMD ["/bin/bash"]

@@ -59,6 +59,7 @@ async def handle_command(command, leader, follower):
     match command:
         case "/takeoff_follower":
             logger.debug("takeoff_follower")
+            await follower.takeoff()
         case "/follow":
             logger.info("Starting follow loop...")
             await follow_loop(leader, follower)
@@ -113,8 +114,7 @@ async def run():
         "--mavsdk_drone",
         help="MAVSDK connection string (default: udp://:14550)",
         nargs="?",
-        const="udp://:14551",
-        default=None,
+        default="udp://:14551",
     )
 
     # Either --olympe_drone or --bebop_drone must be provided, but their values are optional
@@ -122,35 +122,22 @@ async def run():
         "--olympe_drone",
         help="Parrot Olympe IP (optional)",
         nargs="?",
-        const="192.168.42.1",
-        default=None,
+        default="192.168.42.1",
     )
 
     args = parser.parse_args()
 
-    # Enforce --mavsdk_drone must be specified (even without a value)
-    if args.mavsdk_drone is None:
-        parser.error("--mavsdk_drone must be specified (address is optional)")
-
-    # Enforce --mavsdk_drone must be specified (even without a value)
-    if args.olympe_drone is None:
-        parser.error("At least one of --olympe_drone or --bebop_drone must be specified (addresses are optional)")
-
     leader = None
     follower = None
 
-    if args.mavsdk_drone:
-        leader = MAVSDKCommander(args.mavsdk_drone)
-        logger.debug(f"Using MAVSDK commander as leader with address {args.mavsdk_drone}")
-    if args.olympe_drone:
-        follower = OlympeCommander(args.olympe_drone)
-        logger.debug(f"Using Olympe commander as follower with address {args.olympe_drone}")
-    else:
-        raise ValueError("No drone specified")
+    leader = MAVSDKCommander(args.mavsdk_drone)
+    logger.debug(f"Using MAVSDK commander as leader with address {args.mavsdk_drone}")
+    follower = OlympeCommander(args.olympe_drone)
+    logger.debug(f"Using Olympe commander as follower with address {args.olympe_drone}")
 
     if leader and follower:
         try:
-            task = asyncio.gather(follower.connect())
+            task = asyncio.gather(leader.connect(), follower.connect())
             await task
         except Exception as e:
             logger.error(f"Error connecting to drones: {e}")

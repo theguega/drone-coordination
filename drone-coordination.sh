@@ -39,7 +39,7 @@ case "$ACTION" in
     if [[ "$PLATFORM" == "Linux" ]]; then
       echo "🚀 [RUN] Linux: Running with uv..."
       source .venv/bin/activate
-      python src/main.py --mavsdk_drone --olympe_drone
+      python src/main.py
 
     elif [[ "$PLATFORM" == "Darwin" ]]; then
       echo "🚀 [RUN] macOS: Running Docker container..."

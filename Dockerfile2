@@ -37,4 +37,4 @@ RUN pip install -e .
 EXPOSE 8080 8123 8765 4222 6222 8222
 
 # Start the application
-CMD ["python", "src/main.py", "--mavsdk_drone", "--olympe_drone"]
+CMD ["/bin/bash"]

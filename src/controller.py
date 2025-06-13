@@ -19,9 +19,7 @@ def run_background_loop(loop):
     loop.run_forever()
 
 
-threading.Thread(
-    target=run_background_loop, args=(background_loop,), daemon=True
-).start()
+threading.Thread(target=run_background_loop, args=(background_loop,), daemon=True).start()
 
 
 # Decorator for joystick deadzone
@@ -53,10 +51,11 @@ class MyController(Controller):
         )
 
     def on_x_press(self):
+        print("on_x_press")
         asyncio.run_coroutine_threadsafe(self.commander.takeoff(), background_loop)
 
     def on_x_release(self):
-        # print("on_x_release")
+        print("on_x_release")
         pass
 
     def on_triangle_press(self):
@@ -66,16 +65,16 @@ class MyController(Controller):
         print("on_triangle_release")
 
     def on_circle_press(self):
+        print("on_circle_press")
         asyncio.run_coroutine_threadsafe(self.commander.land(), background_loop)
 
     def on_circle_release(self):
-        # print("on_circle_release")
+        print("on_circle_release")
         pass
 
     def on_square_press(self):
-        asyncio.run_coroutine_threadsafe(
-            self.commander.prepare_for_drop(), background_loop
-        )
+        print("on_square_press")
+        asyncio.run_coroutine_threadsafe(self.commander.prepare_for_drop(), background_loop)
 
     def on_square_release(self):
         print("on_square_release")

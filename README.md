@@ -78,7 +78,7 @@ The application supports various connection options:
 
 ```bash
 # Basic usage with default addresses
-python src/main.py --mavsdk_drone --olympe_drone
+python src/main.py
 
 # Custom connection addresses
 python src/main.py --mavsdk_drone udp://:14551 --olympe_drone 192.168.42.1

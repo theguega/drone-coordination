@@ -7,6 +7,7 @@ from olympe.messages.ardrone3.Piloting import PCMD, Emergency, Landing, TakeOff,
 from olympe.messages.ardrone3.PilotingState import FlyingStateChanged, PositionChanged
 
 MAX_RETRY = 3
+TIME_OUT_DROP = 15
 
 olympe.log.update_config({"loggers": {"olympe": {"level": "ERROR"}}})
 logger = logging.getLogger()
@@ -65,7 +66,7 @@ class OlympeCommander(BaseCommander):
 
     async def prepare_for_drop(self) -> None:
         try:
-            dropping_procedure = self.drone(UserTakeOff(1) >> FlyingStateChanged(state="hovering", _timeout=10)).wait()
+            dropping_procedure = self.drone(UserTakeOff(1) >> FlyingStateChanged(state="hovering", _timeout=TIME_OUT_DROP)).wait()
             if dropping_procedure.success():
                 logger.info("[Olympe] Drone has been released")
                 self.in_the_air = True
