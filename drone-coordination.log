@@ -288,3 +288,76 @@ Received signal 2. Exiting gracefully...
 Ctrl-C detected. Exiting gracefully...
 2025-06-13 14:02:33 INFO     Cleaning up resources...
 2025-06-13 14:02:33 DEBUG    Cleanup completed.
+2025-06-13 14:35:33 DEBUG    Using selector: EpollSelector
+2025-06-13 14:35:33 DEBUG    Using MAVSDK commander as leader with address udp://:14551
+2025-06-13 14:35:33 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-06-13 14:35:33 ERROR    Error connecting to drones: 'MAVSDKCommander' object has no attribute 'connection_string'
+2025-06-13 14:35:33 INFO     Cleaning up resources...
+2025-06-13 14:35:33 DEBUG    Cleanup completed.
+2025-06-13 14:39:44 DEBUG    Using selector: EpollSelector
+2025-06-13 14:39:44 DEBUG    Using MAVSDK commander as leader with address udp://:14551
+2025-06-13 14:39:44 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-06-13 14:39:44 DEBUG    Attempting to connect to drone at udp://:14551
+2025-06-13 14:39:44 DEBUG    Connection attempt 1/3
+2025-06-13 14:39:44 DEBUG    Waiting for mavsdk_server to be ready...
+2025-06-13 14:39:44 DEBUG    [34m[02:39:44|Info ] [0mMAVSDK version: v2.12.10 (mavsdk_impl.cpp:26)
+2025-06-13 14:39:45 DEBUG    Connected to mavsdk_server!
+2025-06-13 14:39:45 ERROR    Connection attempt 1 failed: 'MAVSDKCommander' object has no attribute 'wait_for_connection'
+2025-06-13 14:39:46 DEBUG    Connection attempt 2/3
+2025-06-13 14:39:47 DEBUG    Waiting for mavsdk_server to be ready...
+2025-06-13 14:39:47 DEBUG    [34m[02:39:47|Info ] [0mMAVSDK version: v2.12.10 (mavsdk_impl.cpp:26)
+2025-06-13 14:39:48 DEBUG    Connected to mavsdk_server!
+2025-06-13 14:39:48 ERROR    Connection attempt 2 failed: 'MAVSDKCommander' object has no attribute 'wait_for_connection'
+2025-06-13 14:39:49 WARNING  
+Received signal 2. Exiting gracefully...
+2025-06-13 14:39:49 WARNING  Program terminated by user.
+2025-06-13 14:40:36 DEBUG    Using selector: EpollSelector
+2025-06-13 14:40:36 DEBUG    Using MAVSDK commander as leader with address udp://:14551
+2025-06-13 14:40:36 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-06-13 14:40:36 DEBUG    Attempting to connect to drone at udp://:14551
+2025-06-13 14:40:36 DEBUG    Connection attempt 1/3
+2025-06-13 14:40:36 DEBUG    Waiting for mavsdk_server to be ready...
+2025-06-13 14:40:36 DEBUG    [34m[02:40:36|Info ] [0mMAVSDK version: v2.12.10 (mavsdk_impl.cpp:26)
+2025-06-13 14:40:37 DEBUG    Connected to mavsdk_server!
+2025-06-13 14:40:37 DEBUG    Connection attempt 2/3
+2025-06-13 14:40:38 DEBUG    Waiting for mavsdk_server to be ready...
+2025-06-13 14:40:38 DEBUG    [34m[02:40:38|Info ] [0mMAVSDK version: v2.12.10 (mavsdk_impl.cpp:26)
+2025-06-13 14:40:39 DEBUG    Connected to mavsdk_server!
+2025-06-13 14:40:39 DEBUG    Connection attempt 3/3
+2025-06-13 14:40:40 DEBUG    Waiting for mavsdk_server to be ready...
+2025-06-13 14:40:40 DEBUG    [34m[02:40:40|Info ] [0mMAVSDK version: v2.12.10 (mavsdk_impl.cpp:26)
+2025-06-13 14:40:41 DEBUG    Connected to mavsdk_server!
+2025-06-13 14:40:41 ERROR    Failed to connect after 3 attempts
+2025-06-13 14:41:39 DEBUG    [34m[02:40:40|Info ] [0mNew system on: 127.0.0.1:59426 (with system ID: 51) (udp_connection.cpp:178)
+2025-06-13 14:41:39 DEBUG    [32m[02:40:40|Debug] [0mNew system ID: 1 Comp ID: 1 (mavsdk_impl.cpp:750)
+2025-06-13 14:41:39 DEBUG    [32m[02:40:40|Debug] [0mComponent Autopilot (1) added. (system_impl.cpp:366)
+2025-06-13 14:41:39 DEBUG    [34m[02:40:40|Info ] [0mSystem discovered (connection_initiator.h:39)
+2025-06-13 14:41:39 DEBUG    [34m[02:40:40|Info ] [0mServer started (grpc_server.cpp:169)
+2025-06-13 14:41:39 DEBUG    [34m[02:40:40|Info ] [0mServer set to listen on 0.0.0.0:50051 (grpc_server.cpp:170)
+2025-06-13 14:41:39 DEBUG    [33m[02:40:40|Warn ] [0mVehicle type changed (new type: 2, old type: 0) (system_impl.cpp:217)
+2025-06-13 14:41:39 DEBUG    [32m[02:40:40|Debug] [0mDiscovered 1 component(s) (system_impl.cpp:509)
+2025-06-13 14:41:39 DEBUG    [32m[02:41:08|Debug] [0mMAVLink: critical: PreArm: Hardware safety switch (system_impl.cpp:243)
+2025-06-13 14:41:39 DEBUG    [32m[02:41:08|Debug] [0mMAVLink: critical: PreArm: Check mag field (xy diff:133>100) (system_impl.cpp:243)
+2025-06-13 14:41:39 DEBUG    [32m[02:41:39|Debug] [0mMAVLink: critical: PreArm: Hardware safety switch (system_impl.cpp:243)
+2025-06-13 14:43:59 WARNING  
+Received signal 2. Exiting gracefully...
+2025-06-13 14:43:59 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-06-13 14:43:59 INFO     Cleaning up resources...
+2025-06-13 14:43:59 DEBUG    Cleanup completed.
+2025-06-13 14:43:59 DEBUG    [32m[02:41:39|Debug] [0mMAVLink: critical: PreArm: Check mag field (xy diff:134>100)
+2025-06-13 14:44:04 DEBUG    Using selector: EpollSelector
+2025-06-13 14:44:04 DEBUG    Using MAVSDK commander as leader with address udp://:14551
+2025-06-13 14:44:04 DEBUG    Using Olympe commander as follower with address 192.168.42.1
+2025-06-13 14:44:04 DEBUG    Attempting to connect to drone at udp://:14551
+2025-06-13 14:44:04 DEBUG    Waiting for mavsdk_server to be ready...
+2025-06-13 14:44:04 DEBUG    [34m[02:44:04|Info ] [0mMAVSDK version: v2.12.10 (mavsdk_impl.cpp:26)
+2025-06-13 14:44:05 DEBUG    Connected to mavsdk_server!
+2025-06-13 14:44:05 DEBUG    Connected to drone at udp://:14551
+2025-06-13 14:44:05 DEBUG    -- Connected to drone!
+2025-06-13 14:44:17 WARNING  
+Received signal 2. Exiting gracefully...
+2025-06-13 14:44:17 WARNING  
+Ctrl-C detected. Exiting gracefully...
+2025-06-13 14:44:17 INFO     Cleaning up resources...
+2025-06-13 14:44:17 DEBUG    Cleanup completed.

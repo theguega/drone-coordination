@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from typing import Tuple
 
@@ -19,6 +18,7 @@ class MAVSDKCommander(BaseCommander):
     def __init__(self, address: str):
         super().__init__(address)
         self.drone = System()
+        self.connection_string = address
 
     async def connect(self) -> None:
         """Connect to the drone with multiple retry attempts.
@@ -27,27 +27,20 @@ class MAVSDKCommander(BaseCommander):
             bool: True if connection successful, False otherwise
         """
         logger.debug(f"Attempting to connect to drone at {self.connection_string}")
-
-        for attempt in range(1, MAX_CONNECTION_ATTEMPTS + 1):
-            try:
-                logger.debug(f"Connection attempt {attempt}/{MAX_CONNECTION_ATTEMPTS}")
-                await self.drone.connect(system_address=self.connection_string)
-
-                # Wait for connection with timeout
-                connection_task = asyncio.create_task(self.wait_for_connection())
-                try:
-                    await asyncio.wait_for(connection_task, timeout=CONNECTION_TIMEOUT)
-                    logger.debug("Successfully connected to the drone!")
-                    return True
-                except asyncio.TimeoutError:
-                    logger.warning(f"Connection attempt {attempt} timed out after {CONNECTION_TIMEOUT} seconds")
-                    continue
-
-            except Exception as e:
-                logger.error(f"Connection attempt {attempt} failed: {e}")
-                await asyncio.sleep(1)
-
-        logger.error(f"Failed to connect after {MAX_CONNECTION_ATTEMPTS} attempts")
+        try:
+            await self.drone.connect(system_address=self.connection_string)
+            logger.debug(f"Connected to drone at {self.connection_string}")
+            async for state in self.drone.core.connection_state():
+                if state.is_connected:
+                    logger.debug("-- Connected to drone with MAVSDK!")
+                    break
+            logger.debug("Waiting for drone to have a global position estimate...")
+            async for health in self.drone.telemetry.health():
+                if health.is_global_position_ok and health.is_home_position_ok:
+                    logger.debug("-- Global position estimate OK")
+                    break
+        except Exception as e:
+            logger.error(f"Error connecting to drone: {e}")
 
     async def disconnect(self) -> None:
         raise NotImplementedError("not implemented for MAVSDKCommander")

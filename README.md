@@ -13,7 +13,7 @@ A sophisticated drone coordination system that enables autonomous following beha
 
 ## 🛠️ Prerequisites
 
-### For MacOS
+### For MacOS (not tested)
 - Docker
 
 ### For Linux
@@ -21,14 +21,11 @@ A sophisticated drone coordination system that enables autonomous following beha
 
 ## 🚀 Getting Started
 
-### Using Docker (Recommended for MacOS)
+### Using the script
 
 ```bash
-# Build the Docker container
+# Build the Docker container or the virtual environment
 ./drone-coordination.sh build
-
-# Run the application
-./drone-coordination.sh run
 ```
 
 ### Direct Installation (Linux)
@@ -43,6 +40,28 @@ pip install -e .
 ```
 
 ## 🎯 Usage
+
+First of all, switch ON Parrot Anafi via Wifi.
+Connect the telemtry on the VTOL drone.
+
+Launch the proxy with the following command:
+
+```bash
+source .venv/bin/activate
+# Give permission to read and write to the USB port
+sudo chmod 666 /dev/ttyUSB0
+# Proxy the USB connection to UDP for QGroundControl and the Python app
+./.venv/bin/mavproxy.py --master=/dev/ttyUSB0 --out=udp:127.0.0.1:14550 --out=udp:127.0.0.1:14551
+```
+
+Now you can connect to the drone with QGroundControl on udp://127.0.0.1:14550
+And on the python app with udp://127.0.0.1:14551
+
+Just run the python app with the following command:
+
+```bash
+./drone-coordination.sh run
+```
 
 The application provides several commands for controlling the drones:
 

@@ -1,3 +1,16 @@
+## One Computer Setup - Linux
+
+You can use the same computer to connect QGroundControl and the python app.
+
+Mavproxy should be installed inside the virtual environment.
+
+```bash
+# Give permission to read and write to the USB port
+sudo chmod 666 /dev/ttyUSB0
+# Proxy the USB connection to UDP for QGroundControl and the Python app
+./.venv/bin/mavproxy.py --master=/dev/ttyUSB0 --out=udp:127.0.0.1:14550 --out=udp:127.0.0.1:14551
+```
+
 ## PC1 (Windows - USB + QGroundControl)
 
 **Step 1: Install MAVProxy on Windows**
