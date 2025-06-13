@@ -60,8 +60,8 @@ class OlympeCommander(BaseCommander):
             assert self.drone(TakeOff()).wait().success()
             self.in_the_air = True
             logger.info("[Olympe] Takeoff successful")
-        except Exception:
-            logger.error("[Olympe] Takeoff failed")
+        except Exception as e:
+            logger.error(f"[Olympe] Takeoff failed : {e}")
 
     async def prepare_for_drop(self) -> None:
         try:
